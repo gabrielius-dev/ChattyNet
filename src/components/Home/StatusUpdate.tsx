@@ -15,8 +15,11 @@ import {
   SentimentSatisfiedOutlined,
   AutoAwesomeOutlined,
 } from "@mui/icons-material";
+import { useAppSelector } from "../../app/hooks";
 
 export default function StatusUpdate() {
+  const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
+
   return (
     <Box
       sx={{
@@ -35,46 +38,47 @@ export default function StatusUpdate() {
         <AutoAwesomeOutlined color="primary" sx={{ transform: "scaleX(-1)" }} />
       </Grid>
       <Divider />
-      <Grid container spacing={2} padding={1}>
-        <Grid item sx={{ paddingTop: "1.5rem !important" }}>
-          <Avatar></Avatar>
-        </Grid>
-        <Grid item xs={12} sm container spacing={2}>
-          <Grid item xs>
-            <TextField
-              fullWidth
-              variant="outlined"
-              label="What's happening?"
-              multiline
-              maxRows={3}
-            />
+      {isLoggedIn && (
+        <Grid container spacing={2} padding={1}>
+          <Grid item sx={{ paddingTop: "1.5rem !important" }}>
+            <Avatar></Avatar>
           </Grid>
-          <Grid item xs={12} container>
-            <Grid item xs container>
-              <IconButton
-                aria-label="upload image"
-                color="primary"
-                component="label"
-              >
-                <input hidden accept="image/*" multiple type="file" />
-                <AddPhotoAlternateOutlined />
-              </IconButton>
-              <IconButton aria-label="add gif" color="primary">
-                <GifBoxOutlined />
-              </IconButton>
-              <IconButton aria-label="add smile" color="primary">
-                <SentimentSatisfiedOutlined />
-              </IconButton>
+          <Grid item xs={12} sm container spacing={2}>
+            <Grid item xs>
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="What's happening?"
+                multiline
+                maxRows={3}
+              />
             </Grid>
-            <Grid item>
-              <Button variant="contained" color="primary">
-                Tweet
-              </Button>
+            <Grid item xs={12} container>
+              <Grid item xs container>
+                <IconButton
+                  aria-label="upload image"
+                  color="primary"
+                  component="label"
+                >
+                  <input hidden accept="image/*" multiple type="file" />
+                  <AddPhotoAlternateOutlined />
+                </IconButton>
+                <IconButton aria-label="add gif" color="primary">
+                  <GifBoxOutlined />
+                </IconButton>
+                <IconButton aria-label="add smile" color="primary">
+                  <SentimentSatisfiedOutlined />
+                </IconButton>
+              </Grid>
+              <Grid item>
+                <Button variant="contained" color="primary">
+                  Tweet
+                </Button>
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
-      </Grid>
-      <Divider />
+      )}
       <Box
         sx={{ height: "0.5rem", backgroundColor: "rgba(0, 0, 0, 0.12)" }}
       ></Box>
