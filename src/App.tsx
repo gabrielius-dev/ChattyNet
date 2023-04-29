@@ -6,8 +6,14 @@ import Notifications from "./components/Notifications/Notifications";
 import Messages from "./components/Messages/Messages";
 import Bookmarks from "./components/Bookmarks/Bookmarks";
 import Profile from "./components/Profile/Profile";
+import { useAppSelector } from "./app/hooks";
+import LoginReminder from "./components/LoginReminder";
+import useLocationListener from "./app/functions/historyListener";
 
 function App() {
+  const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
+  useLocationListener();
+
   return (
     <Box sx={{ display: "flex" }}>
       <Sidebar />
@@ -18,6 +24,7 @@ function App() {
         <Route path="/bookmarks" element={<Bookmarks />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
+      {isLoggedIn && <LoginReminder />}
     </Box>
   );
 }
