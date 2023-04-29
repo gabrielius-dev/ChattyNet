@@ -71,7 +71,11 @@ export default function StatusUpdate() {
                 </IconButton>
               </Grid>
               <Grid item>
-                <Button variant="contained" color="primary">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{ borderRadius: "20px", textTransform: "none" }}
+                >
                   Tweet
                 </Button>
               </Grid>
