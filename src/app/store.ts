@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import loginReducer from "./features/loginSlice";
 import locationReducer from "./features/locationSlice";
+import UIReducer from "./features/UISlice";
 
 export const store = configureStore({
   reducer: {
     login: loginReducer,
     location: locationReducer,
+    UI: UIReducer,
   },
 });
 
