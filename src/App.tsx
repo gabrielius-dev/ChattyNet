@@ -13,7 +13,7 @@ import LogInForm from "./components/AuthForms/LogInForm";
 import SignUpForm from "./components/AuthForms/SignUpForm";
 
 function App() {
-  const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
+  const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
   const isLogInFormShowing = useAppSelector(
     (state) => state.UI.isLogInFormShowing
   );

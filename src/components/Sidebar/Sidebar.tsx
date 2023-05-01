@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { LIGHT_BLUE_COLOR } from "../../styles/colors";
 
 export default function Sidebar() {
-  const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
+  const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
   let currentLocation = useAppSelector(
     (state) => state.location.location
   ).slice(1);

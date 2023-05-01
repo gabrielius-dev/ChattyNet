@@ -18,7 +18,7 @@ import {
 import { useAppSelector } from "../../app/hooks";
 
 export default function StatusUpdate() {
-  const isLoggedIn = useAppSelector((state) => state.login.isLoggedIn);
+  const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
 
   return (
     <Box
