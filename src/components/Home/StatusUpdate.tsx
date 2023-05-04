@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   Avatar,
   Box,
@@ -8,16 +9,13 @@ import {
   IconButton,
   Button,
 } from "@mui/material";
-
-import {
-  AddPhotoAlternateOutlined,
-  GifBoxOutlined,
-  SentimentSatisfiedOutlined,
-  AutoAwesomeOutlined,
-} from "@mui/icons-material";
+import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
+import GifBoxOutlined from "@mui/icons-material/GifBoxOutlined";
+import SentimentSatisfiedOutlined from "@mui/icons-material/SentimentSatisfiedOutlined";
+import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import { useAppSelector } from "../../app/hooks";
 
-export default function StatusUpdate() {
+const StatusUpdate = memo(() => {
   const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
 
   return (
@@ -88,4 +86,6 @@ export default function StatusUpdate() {
       ></Box>
     </Box>
   );
-}
+});
+
+export default StatusUpdate;
