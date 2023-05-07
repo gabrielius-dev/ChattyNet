@@ -1,13 +1,11 @@
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback } from "react";
 import {
-  Alert,
   Drawer,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Snackbar,
 } from "@mui/material";
 import HomeOutlined from "@mui/icons-material/HomeOutlined";
 import NotificationsOutlined from "@mui/icons-material/NotificationsOutlined";
@@ -20,10 +18,10 @@ import { LIGHT_BLUE_COLOR } from "../../styles/colors";
 import { signOut } from "firebase/auth";
 import { auth } from "../../app/firebase/firebase";
 import { setUser } from "../../app/features/userSlice";
+import { setErrorMessage, setIsSnackbarOpen } from "../../app/features/UISlice";
 
 export default function Sidebar() {
   const dispatch = useAppDispatch();
-  const [openSnackbar, setOpenSnackbar] = useState(false);
   const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
   let currentLocation = useAppSelector(
     (state) => state.location.location
@@ -73,17 +71,14 @@ export default function Sidebar() {
   const getColor = (label: string) =>
     currentLocation === label.toLowerCase() ? LIGHT_BLUE_COLOR : "black";
 
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-  };
-
   const signOutUser = () => {
     signOut(auth)
       .then(() => {
         dispatch(setUser({ isLoggedIn: false }));
       })
       .catch(() => {
-        setOpenSnackbar(true);
+        dispatch(setErrorMessage("Error signing out. Please try again."));
+        dispatch(setIsSnackbarOpen(true));
       });
   };
 
@@ -142,20 +137,6 @@ export default function Sidebar() {
           )}
         </List>
       </Drawer>
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        sx={{}}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity="error"
-          sx={{ width: "100%" }}
-        >
-          Error signing out. Please try again.
-        </Alert>
-      </Snackbar>
     </>
   );
 }
