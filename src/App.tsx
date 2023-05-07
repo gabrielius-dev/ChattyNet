@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Alert, Box, Snackbar } from "@mui/material";
 import Sidebar from "./components/Sidebar/Sidebar";
 import { Route, Routes } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
@@ -8,6 +8,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./app/firebase/firebase";
 import { setUser } from "./app/features/userSlice";
 import CircularProgressComponent from "./components/CircularProgress";
+import { setIsSnackbarOpen } from "./app/features/UISlice";
 
 const Home = lazy(() => import("./components/Home/Home"));
 const Notifications = lazy(
@@ -30,6 +31,8 @@ function App() {
   const isSignUpFormShowing = useAppSelector(
     (state) => state.UI.isSignUpFormShowing
   );
+  const isSnackbarOpen = useAppSelector((state) => state.UI.isSnackbarOpen);
+  const errorMessage = useAppSelector((state) => state.UI.errorMessage);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -63,6 +66,18 @@ function App() {
         {isSignUpFormShowing && <SignUpForm />}
         {!isLoggedIn && <LoginReminder />}
       </Suspense>
+      <Snackbar
+        open={isSnackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => dispatch(setIsSnackbarOpen(false))}
+      >
+        <Alert
+          onClose={() => dispatch(setIsSnackbarOpen(false))}
+          severity="error"
+        >
+          {errorMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
