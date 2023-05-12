@@ -11,6 +11,7 @@ import {
   Stack,
   TextField,
   Typography,
+  Link,
 } from "@mui/material";
 import { useRef, useState } from "react";
 import { auth } from "../../app/firebase/firebase";
@@ -19,7 +20,7 @@ import { db } from "../../app/firebase/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { isUsernameTaken } from "./helperFunctions";
 import { useAppDispatch } from "../../app/hooks";
-import { hideSignUpForm } from "../../app/features/UISlice";
+import { hideSignUpForm, showLogInForm } from "../../app/features/UISlice";
 
 interface AuthErrorMessages {
   "auth/invalid-email": string;
@@ -73,6 +74,8 @@ export default function CreateAccountForm() {
       return;
     }
 
+    const fullName = firstName + lastName;
+
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
@@ -80,11 +83,14 @@ export default function CreateAccountForm() {
         setDoc(doc(db, "usernames", username), {
           username,
         });
+        setDoc(doc(db, "emails", email), {
+          email,
+        });
         return setDoc(doc(db, "users", user.uid), {
-          firstName,
-          lastName,
+          fullName,
           username,
           email,
+          isSignUpSetupFinished: true,
         });
         // ...
       })
@@ -181,6 +187,19 @@ export default function CreateAccountForm() {
           </Button>
         </Stack>
       </form>
+      <Stack direction="row" mt={5} spacing={1}>
+        <Typography variant="body1">Have an account already?</Typography>
+        <Link
+          component="button"
+          underline="hover"
+          onClick={() => {
+            dispatch(hideSignUpForm());
+            dispatch(showLogInForm());
+          }}
+        >
+          Log in
+        </Link>
+      </Stack>
     </>
   );
 }
