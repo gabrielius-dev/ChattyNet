@@ -2,14 +2,12 @@ import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./features/userSlice";
 import locationReducer from "./features/locationSlice";
 import UIReducer from "./features/UISlice";
-import signUpReducer from "./features/signUpSlice";
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
     location: locationReducer,
     UI: UIReducer,
-    signUp: signUpReducer,
   },
 });
 
