@@ -21,18 +21,8 @@ import { doc, setDoc } from "firebase/firestore";
 import { isUsernameTaken } from "./helperFunctions";
 import { useAppDispatch } from "../../app/hooks";
 import { hideSignUpForm, showLogInForm } from "../../app/features/UISlice";
-
-interface AuthErrorMessages {
-  "auth/invalid-email": string;
-  "auth/email-already-in-use": string;
-  "auth/weak-password": string;
-}
-
-const authErrorMessages: AuthErrorMessages = {
-  "auth/invalid-email": "Invalid email address",
-  "auth/email-already-in-use": "Email is already in use",
-  "auth/weak-password": "Password is too weak",
-};
+import { FirebaseError } from "firebase/app";
+import { setUser } from "../../app/features/userSlice";
 
 export default function CreateAccountForm() {
   const dispatch = useAppDispatch();
@@ -55,6 +45,7 @@ export default function CreateAccountForm() {
     email: string,
     password: string
   ) => {
+    dispatch(setUser({ isAuthenticating: false }));
     e.preventDefault();
 
     // Validate email field
@@ -76,41 +67,52 @@ export default function CreateAccountForm() {
 
     const fullName = firstName + lastName;
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const user = userCredential.user;
+      await Promise.all([
         setDoc(doc(db, "usernames", username), {
           username,
-        });
+        }),
         setDoc(doc(db, "emails", email), {
           email,
-        });
-        return setDoc(doc(db, "users", user.uid), {
+        }),
+        setDoc(doc(db, "users", user.uid), {
           fullName,
           username,
           email,
           isSignUpSetupFinished: true,
-        });
-        // ...
-      })
-      .then(() => {
-        dispatch(hideSignUpForm());
-      })
-      .catch((error) => {
-        const errorCode: keyof AuthErrorMessages = error.code;
-        const errorMessage = authErrorMessages[errorCode] || error.message; // ..
-        const isEmailError = errorMessage.toLowerCase().includes("email");
-        const isPasswordError = errorMessage.toLowerCase().includes("password");
-        if (isEmailError) {
-          (
-            emailRef.current?.childNodes[1]?.childNodes[0] as HTMLElement
-          )?.focus();
-        } else if (isPasswordError) {
-          passwordRef.current?.focus();
-        }
-        setErrorMessage(errorMessage);
-      });
+        }),
+      ]);
+      dispatch(hideSignUpForm());
+    } catch (error: unknown) {
+      const errorCode = (error as FirebaseError).code;
+      let errorMessage = (error as FirebaseError).message;
+      const isEmailError = errorMessage.toLowerCase().includes("email");
+      const isPasswordError = errorMessage.toLowerCase().includes("password");
+
+      if (errorCode === "auth/invalid-email") {
+        errorMessage = "Invalid email address";
+      } else if (errorCode === "auth/email-already-in-use") {
+        errorMessage = "Email is already in use";
+      } else if (errorCode === "auth/weak-password") {
+        errorMessage = "Password is too weak";
+      }
+
+      if (isEmailError) {
+        (
+          emailRef.current?.childNodes[1]?.childNodes[0] as HTMLElement
+        )?.focus();
+      } else if (isPasswordError) {
+        passwordRef.current?.focus();
+      }
+      setErrorMessage(errorMessage);
+    }
   };
 
   return (
@@ -187,7 +189,7 @@ export default function CreateAccountForm() {
           </Button>
         </Stack>
       </form>
-      <Stack direction="row" mt={5} spacing={1}>
+      <Stack direction="row" mt={4} spacing={1}>
         <Typography variant="body1">Have an account already?</Typography>
         <Link
           component="button"
