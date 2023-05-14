@@ -5,10 +5,16 @@ import { useAppDispatch, useAppSelector } from "./app/hooks";
 import useLocationListener from "./app/functions/historyListener";
 import { useEffect, useState, lazy, Suspense } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./app/firebase/firebase";
+import { auth, db } from "./app/firebase/firebase";
 import { setUser } from "./app/features/userSlice";
 import CircularProgressComponent from "./components/CircularProgress";
-import { setIsSnackbarOpen } from "./app/features/UISlice";
+import {
+  hideLoginReminder,
+  setIsSnackbarOpen,
+  showLoginReminder,
+} from "./app/features/UISlice";
+import { doc, getDoc } from "firebase/firestore";
+import RemainingSignUpSetup from "./components/AuthForms/RemainingSignUpSetup";
 
 const Home = lazy(() => import("./components/Home/Home"));
 const Notifications = lazy(
@@ -23,7 +29,6 @@ const LoginReminder = lazy(() => import("./components/LoginReminder"));
 
 function App() {
   const dispatch = useAppDispatch();
-  const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
   const [loading, setLoading] = useState(true);
   const isLogInFormShowing = useAppSelector(
     (state) => state.UI.isLogInFormShowing
@@ -33,19 +38,54 @@ function App() {
   );
   const isSnackbarOpen = useAppSelector((state) => state.UI.isSnackbarOpen);
   const errorMessage = useAppSelector((state) => state.UI.errorMessage);
+  const isLoginReminderShowing = useAppSelector(
+    (state) => state.UI.isLoginReminderShowing
+  );
+  const isSignUpSetupFinished = useAppSelector(
+    (state) => state.user.isSignUpSetupFinished
+  );
+  const isAuthenticating = useAppSelector(
+    (state) => state.user.isAuthenticating
+  );
+  const [userExists, setUserExists] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(false);
-      if (user) {
-        dispatch(
-          setUser({ uid: user.uid, email: user.email, isLoggedIn: true })
+      console.log(user);
+      if (user && !isAuthenticating) {
+        const docRef = doc(db, "users", user.uid);
+        // Get the document
+        const documentSnapshot = await getDoc(docRef);
+
+        // Access a specific field value
+        const isSignUpSetupFinished = documentSnapshot.get(
+          "isSignUpSetupFinished"
         );
-      } else dispatch(setUser({ isLoggedIn: false }));
+
+        setUserExists(true);
+        const username = documentSnapshot.get("username");
+        dispatch(
+          setUser({
+            username: username,
+            uid: user.uid,
+            email: user.email,
+            isSignUpSetupFinished: isSignUpSetupFinished,
+          })
+        );
+        if (isSignUpSetupFinished) {
+          dispatch(setUser({ isLoggedIn: true }));
+          dispatch(hideLoginReminder());
+        }
+      } else {
+        dispatch(setUser({ isLoggedIn: false }));
+        dispatch(showLoginReminder());
+        setUserExists(false);
+      }
     });
 
     return () => unsubscribe();
-  }, [dispatch]);
+  }, [dispatch, isSignUpSetupFinished, isAuthenticating]);
 
   useLocationListener();
 
@@ -64,7 +104,8 @@ function App() {
         </Routes>
         {isLogInFormShowing && <LogInForm />}
         {isSignUpFormShowing && <SignUpForm />}
-        {!isLoggedIn && <LoginReminder />}
+        {isLoginReminderShowing && <LoginReminder />}
+        {!isSignUpSetupFinished && userExists && <RemainingSignUpSetup />}
       </Suspense>
       <Snackbar
         open={isSnackbarOpen}
