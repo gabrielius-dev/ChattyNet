@@ -1,4 +1,3 @@
-import { memo } from "react";
 import {
   Avatar,
   Box,
@@ -15,7 +14,7 @@ import SentimentSatisfiedOutlined from "@mui/icons-material/SentimentSatisfiedOu
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import { useAppSelector } from "../../app/hooks";
 
-const StatusUpdate = memo(() => {
+const StatusUpdate = () => {
   const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
 
   return (
@@ -86,6 +85,6 @@ const StatusUpdate = memo(() => {
       ></Box>
     </Box>
   );
-});
+};
 
 export default StatusUpdate;

@@ -1,11 +1,11 @@
-import { memo, lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { IconButton, Modal, Paper } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { hideSignUpForm } from "../../app/features/UISlice";
 import CloseIcon from "@mui/icons-material/Close";
 import CircularProgressComponent from "../CircularProgress";
 
-const SignUpForm = memo(() => {
+const SignUpForm = () => {
   const CreateAccountForm = lazy(() => import("./CreateAccountForm"));
   const InitialSignUpForm = lazy(() => import("./InitialSignUpForm"));
 
@@ -49,6 +49,6 @@ const SignUpForm = memo(() => {
       </Paper>
     </Modal>
   );
-});
+};
 
 export default SignUpForm;
