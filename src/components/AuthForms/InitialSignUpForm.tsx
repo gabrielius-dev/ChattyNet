@@ -6,7 +6,7 @@ import {
   showCreateAccountForm,
   showLogInForm,
 } from "../../app/features/UISlice";
-import GoogleAuthButton from "./GoogleAuthButton";
+import GoogleAuthButton from "./GoogleSignUpButton";
 
 export default function InitialSignUpForm() {
   const dispatch = useAppDispatch();
