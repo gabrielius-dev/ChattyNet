@@ -1,14 +1,7 @@
 import { memo, lazy, Suspense } from "react";
-import {
-  IconButton,
-  Link,
-  Modal,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { IconButton, Modal, Paper } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { hideSignUpForm, showLogInForm } from "../../app/features/UISlice";
+import { hideSignUpForm } from "../../app/features/UISlice";
 import CloseIcon from "@mui/icons-material/Close";
 import CircularProgressComponent from "../CircularProgress";
 
@@ -18,6 +11,9 @@ const SignUpForm = memo(() => {
 
   const dispatch = useAppDispatch();
   const open = useAppSelector((state) => state.UI.isSignUpFormShowing);
+  const showInitialSignUpForm = useAppSelector(
+    (state) => state.UI.isInitialSignUpFormShowing
+  );
   const showCreateAccountForm = useAppSelector(
     (state) => state.UI.isCreateAccountFormShowing
   );
@@ -47,21 +43,8 @@ const SignUpForm = memo(() => {
           >
             <CloseIcon />
           </IconButton>
-          {!showCreateAccountForm && <InitialSignUpForm />}
+          {showInitialSignUpForm && <InitialSignUpForm />}
           {showCreateAccountForm && <CreateAccountForm />}
-          <Stack direction="row" mt={5} spacing={1}>
-            <Typography variant="body1">Have an account already?</Typography>
-            <Link
-              component="button"
-              underline="hover"
-              onClick={() => {
-                dispatch(hideSignUpForm());
-                dispatch(showLogInForm());
-              }}
-            >
-              Log in
-            </Link>
-          </Stack>
         </Suspense>
       </Paper>
     </Modal>
