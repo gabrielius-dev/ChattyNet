@@ -1,7 +1,6 @@
 import CircularProgress from "@mui/material/CircularProgress/CircularProgress";
-import { memo } from "react";
 
-const CircularProgressComponent = memo(() => {
+const CircularProgressComponent = () => {
   return (
     <CircularProgress
       size={100}
@@ -13,5 +12,5 @@ const CircularProgressComponent = memo(() => {
       }}
     />
   );
-});
+};
 export default CircularProgressComponent;
