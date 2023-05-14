@@ -12,7 +12,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { isUsernameTaken } from "./helperFunctions";
 import { setUser } from "../../app/features/userSlice";
 
-const GoogleAuthButton = () => {
+const GoogleSignUpButton = () => {
   const dispatch = useAppDispatch();
 
   async function generateUniqueUsername(fullName: string) {
@@ -91,4 +91,4 @@ const GoogleAuthButton = () => {
   );
 };
 
-export default GoogleAuthButton;
+export default GoogleSignUpButton;
