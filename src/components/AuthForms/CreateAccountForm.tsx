@@ -37,31 +37,29 @@ export default function CreateAccountForm() {
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
-  const onFormSubmit = async (
-    e: React.FormEvent<HTMLFormElement>,
-    firstName: string,
-    lastName: string,
-    username: string,
-    email: string,
-    password: string
-  ) => {
-    dispatch(setUser({ isAuthenticating: false }));
+  const errorMessages: { [key: string]: string } = {
+    "auth/invalid-email": "Invalid email address",
+    "auth/email-already-in-use": "Email is already in use",
+    "auth/operation-not-allowed": "Operation not allowed",
+    "auth/weak-password": "Password is too weak",
+    "auth/network-request-failed": "Network request failed",
+  };
+
+  const onFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Validate email field
     const emailRegex = /\S+@\S+\.\S+/;
     if (!emailRegex.test(email)) {
       setErrorMessage("Invalid email format");
-      (emailRef.current?.childNodes[1]?.childNodes[0] as HTMLElement)?.focus();
+      emailRef.current?.focus();
       return;
     }
 
     //Check if username already exists
     if (await isUsernameTaken(username)) {
       setErrorMessage("Username is already taken");
-      (
-        usernameRef.current?.childNodes[1]?.childNodes[0] as HTMLElement
-      )?.focus();
+      usernameRef.current?.focus();
       return;
     }
 
@@ -92,22 +90,12 @@ export default function CreateAccountForm() {
       dispatch(hideSignUpForm());
     } catch (error: unknown) {
       const errorCode = (error as FirebaseError).code;
-      let errorMessage = (error as FirebaseError).message;
+      const errorMessage = errorMessages[errorCode] || "Unknown error occurred";
       const isEmailError = errorMessage.toLowerCase().includes("email");
       const isPasswordError = errorMessage.toLowerCase().includes("password");
 
-      if (errorCode === "auth/invalid-email") {
-        errorMessage = "Invalid email address";
-      } else if (errorCode === "auth/email-already-in-use") {
-        errorMessage = "Email is already in use";
-      } else if (errorCode === "auth/weak-password") {
-        errorMessage = "Password is too weak";
-      }
-
       if (isEmailError) {
-        (
-          emailRef.current?.childNodes[1]?.childNodes[0] as HTMLElement
-        )?.focus();
+        emailRef.current?.focus();
       } else if (isPasswordError) {
         passwordRef.current?.focus();
       }
@@ -122,9 +110,7 @@ export default function CreateAccountForm() {
       </Typography>
       <form
         style={{ width: "100%", padding: "1rem" }}
-        onSubmit={(e) =>
-          onFormSubmit(e, firstName, lastName, username, email, password)
-        }
+        onSubmit={(e) => onFormSubmit(e)}
       >
         <Stack spacing={2}>
           <Stack direction="row" spacing={2}>
@@ -144,7 +130,7 @@ export default function CreateAccountForm() {
           <TextField
             label="Username"
             value={username}
-            ref={usernameRef}
+            inputRef={usernameRef}
             onChange={(e) => setUsername(e.target.value)}
             required
           />
@@ -152,7 +138,7 @@ export default function CreateAccountForm() {
             type="email"
             label="Email"
             value={email}
-            ref={emailRef}
+            inputRef={emailRef}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
