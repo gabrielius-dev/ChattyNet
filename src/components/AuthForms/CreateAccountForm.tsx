@@ -22,7 +22,6 @@ import { isUsernameTaken } from "./helperFunctions";
 import { useAppDispatch } from "../../app/hooks";
 import { hideSignUpForm, showLogInForm } from "../../app/features/UISlice";
 import { FirebaseError } from "firebase/app";
-import { setUser } from "../../app/features/userSlice";
 
 export default function CreateAccountForm() {
   const dispatch = useAppDispatch();
