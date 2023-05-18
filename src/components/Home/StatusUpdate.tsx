@@ -4,18 +4,30 @@ import {
   Divider,
   Grid,
   Typography,
-  TextField,
-  IconButton,
   Button,
+  TextField,
 } from "@mui/material";
-import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
-import GifBoxOutlined from "@mui/icons-material/GifBoxOutlined";
-import SentimentSatisfiedOutlined from "@mui/icons-material/SentimentSatisfiedOutlined";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import { useAppSelector } from "../../app/hooks";
+import { useState } from "react";
+import { addDoc, collection } from "firebase/firestore";
+import { db } from "../../app/firebase/firebase";
 
 const StatusUpdate = () => {
   const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
+  const userUid = useAppSelector((state) => state.user.uid);
+  const photoURL = useAppSelector((state) => state.user.photoURL);
+  const username = useAppSelector((state) => state.user.username);
+  const [text, setText] = useState("");
+
+  async function submitPost() {
+    await addDoc(collection(db, "posts"), {
+      createdBy: userUid,
+      text,
+      likes: 0,
+      comments: [],
+    });
+  }
 
   return (
     <Box
@@ -38,40 +50,29 @@ const StatusUpdate = () => {
       {isLoggedIn && (
         <Grid container spacing={2} padding={1}>
           <Grid item sx={{ paddingTop: "1.5rem !important" }}>
-            <Avatar></Avatar>
+            <Avatar src={photoURL}>
+              {!photoURL && username[0].toUpperCase()}
+            </Avatar>
           </Grid>
           <Grid item xs={12} sm container spacing={2}>
-            <Grid item xs>
+            <Grid item xs display="flex">
               <TextField
-                fullWidth
-                variant="outlined"
                 label="What's happening?"
+                fullWidth
                 multiline
-                maxRows={3}
+                maxRows={5}
+                onChange={(e) => setText(e.target.value)}
+                value={text}
+                inputProps={{ maxLength: 1000 }}
               />
             </Grid>
             <Grid item xs={12} container>
-              <Grid item xs container>
-                <IconButton
-                  aria-label="upload image"
-                  color="primary"
-                  component="label"
-                >
-                  <input hidden accept="image/*" multiple type="file" />
-                  <AddPhotoAlternateOutlined />
-                </IconButton>
-                <IconButton aria-label="add gif" color="primary">
-                  <GifBoxOutlined />
-                </IconButton>
-                <IconButton aria-label="add smile" color="primary">
-                  <SentimentSatisfiedOutlined />
-                </IconButton>
-              </Grid>
               <Grid item>
                 <Button
                   variant="contained"
                   color="primary"
                   sx={{ borderRadius: "20px", textTransform: "none" }}
+                  onClick={submitPost}
                 >
                   Tweet
                 </Button>
