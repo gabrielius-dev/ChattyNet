@@ -63,6 +63,8 @@ function App() {
           "isSignUpSetupFinished"
         );
 
+        const photoURL = documentSnapshot.get("photoURL");
+
         setUserExists(true);
         const username = documentSnapshot.get("username");
         dispatch(
@@ -71,6 +73,7 @@ function App() {
             uid: user.uid,
             email: user.email,
             isSignUpSetupFinished: isSignUpSetupFinished,
+            photoURL: photoURL,
           })
         );
         if (isSignUpSetupFinished) {
