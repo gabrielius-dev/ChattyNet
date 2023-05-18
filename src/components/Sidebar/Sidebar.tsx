@@ -1,5 +1,6 @@
 import { useMemo, useCallback } from "react";
 import {
+  Avatar,
   Drawer,
   List,
   ListItem,
@@ -23,6 +24,8 @@ import { setErrorMessage, setIsSnackbarOpen } from "../../app/features/UISlice";
 export default function Sidebar() {
   const dispatch = useAppDispatch();
   const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
+  const photoURL = useAppSelector((state) => state.user.photoURL);
+  const username = useAppSelector((state) => state.user.username);
   let currentLocation = useAppSelector(
     (state) => state.location.location
   ).slice(1);
@@ -55,7 +58,14 @@ export default function Sidebar() {
         },
         {
           label: "Profile",
-          icon: null,
+          icon: (
+            <Avatar
+              src={photoURL}
+              sx={{ height: 36, width: 36, marginLeft: "-5px" }}
+            >
+              {!photoURL && username[0].toUpperCase()}
+            </Avatar>
+          ),
         },
       ];
     } else {
@@ -66,7 +76,7 @@ export default function Sidebar() {
         },
       ];
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, photoURL, username]);
 
   const getColor = (label: string) =>
     currentLocation === label.toLowerCase() ? LIGHT_BLUE_COLOR : "black";
