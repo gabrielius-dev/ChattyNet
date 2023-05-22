@@ -47,6 +47,7 @@ const GoogleSignUpButton = () => {
         const username = await generateUniqueUsername(fullName);
         await Promise.all([
           setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
             fullName,
             email,
             username,

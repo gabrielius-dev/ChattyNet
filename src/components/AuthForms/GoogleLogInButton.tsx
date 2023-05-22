@@ -39,6 +39,7 @@ const GoogleLogInButton = () => {
 
         await Promise.all([
           setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
             fullName,
             email,
             username,

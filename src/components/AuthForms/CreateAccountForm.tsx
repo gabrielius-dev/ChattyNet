@@ -80,6 +80,7 @@ export default function CreateAccountForm() {
           email,
         }),
         setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
           fullName,
           username,
           email,
