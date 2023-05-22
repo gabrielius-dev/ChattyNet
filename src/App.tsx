@@ -67,8 +67,10 @@ function App() {
 
         setUserExists(true);
         const username = documentSnapshot.get("username");
+        const fullName = documentSnapshot.get("fullName");
         dispatch(
           setUser({
+            fullName: fullName,
             username: username,
             uid: user.uid,
             email: user.email,
