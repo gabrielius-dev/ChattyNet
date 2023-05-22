@@ -1,10 +1,19 @@
 import { Box } from "@mui/material";
 import StatusUpdate from "./StatusUpdate";
+import Posts from "./Posts";
 
 export default function Home() {
   return (
-    <Box>
+    <Box
+      sx={{
+        borderLeft: "1px solid rgba(0, 0, 0, 0.12)",
+        borderRight: "1px solid rgba(0, 0, 0, 0.12)",
+        width: "52vw",
+        maxWidth: "1000px",
+      }}
+    >
       <StatusUpdate />
+      <Posts />
     </Box>
   );
 }
