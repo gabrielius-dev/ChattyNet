@@ -96,13 +96,15 @@ export default function Sidebar() {
     <>
       <Drawer
         sx={{
-          position: "relative",
+          position: "sticky",
+          top: 0,
           minWidth: "fit-content",
           width: "15vw",
           "& .MuiDrawer-paper": {
             paddingTop: "5vh",
             position: "relative",
             boxSizing: "border-box",
+            borderRight: "none",
           },
           height: "100vh",
         }}
