@@ -28,6 +28,7 @@ const StatusUpdate = () => {
       comments: [],
       date: serverTimestamp(),
     });
+    setText("");
   }
 
   return (
