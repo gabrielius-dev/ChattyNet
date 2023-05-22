@@ -10,7 +10,7 @@ import {
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import { useAppSelector } from "../../app/hooks";
 import { useState } from "react";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../app/firebase/firebase";
 
 const StatusUpdate = () => {
@@ -26,6 +26,7 @@ const StatusUpdate = () => {
       text,
       likes: 0,
       comments: [],
+      date: serverTimestamp(),
     });
   }
 
@@ -34,7 +35,6 @@ const StatusUpdate = () => {
       sx={{
         width: "52vw",
         maxWidth: "1000px",
-        borderRight: "1px solid rgba(0, 0, 0, 0.12)",
       }}
     >
       <Grid
