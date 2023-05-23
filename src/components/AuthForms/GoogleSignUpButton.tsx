@@ -53,6 +53,9 @@ const GoogleSignUpButton = () => {
             username,
             photoURL: user.photoURL,
             isSignUpSetupFinished: false,
+            likedPosts: [],
+            followers: 0,
+            following: 0,
           }),
           setDoc(docRef, { email }),
         ]);
