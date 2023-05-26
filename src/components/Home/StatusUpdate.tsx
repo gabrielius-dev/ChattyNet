@@ -8,12 +8,14 @@ import {
   TextField,
 } from "@mui/material";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
-import { useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../app/firebase/firebase";
+import { setErrorMessage, setIsSnackbarOpen } from "../../app/features/UISlice";
 
 const StatusUpdate = () => {
+  const dispatch = useAppDispatch();
   const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
   const userUid = useAppSelector((state) => state.user.uid);
   const photoURL = useAppSelector((state) => state.user.photoURL);
@@ -21,14 +23,21 @@ const StatusUpdate = () => {
   const [text, setText] = useState("");
 
   async function submitPost() {
-    await addDoc(collection(db, "posts"), {
-      createdBy: userUid,
-      text,
-      likes: 0,
-      comments: [],
-      date: serverTimestamp(),
-    });
-    setText("");
+    try {
+      await addDoc(collection(db, "posts"), {
+        createdBy: userUid,
+        text,
+        likes: 0,
+        comments: [],
+        date: serverTimestamp(),
+      });
+      setText("");
+    } catch {
+      dispatch(
+        setErrorMessage("Error occurred while creating post. Try again later!")
+      );
+      dispatch(setIsSnackbarOpen(true));
+    }
   }
 
   return (
