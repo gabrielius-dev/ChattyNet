@@ -10,9 +10,16 @@ import {
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useState } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../../app/firebase/firebase";
 import { setErrorMessage, setIsSnackbarOpen } from "../../app/features/UISlice";
+import { addNewPost } from "../../app/features/postsSlice";
+import { PostData } from "../../app/types/postType";
 
 const StatusUpdate = () => {
   const dispatch = useAppDispatch();
@@ -20,17 +27,41 @@ const StatusUpdate = () => {
   const userUid = useAppSelector((state) => state.user.uid);
   const photoURL = useAppSelector((state) => state.user.photoURL);
   const username = useAppSelector((state) => state.user.username);
+  const fullName = useAppSelector((state) => state.user.fullName);
   const [text, setText] = useState("");
+
+  const addPost = async (date: string, postId: string) => {
+    const post: PostData = {
+      username,
+      fullName,
+      photoURL,
+      date,
+      text,
+      likes: 0,
+      comments: [],
+      postId,
+      hasLiked: false,
+    };
+    dispatch(addNewPost(post));
+  };
 
   async function submitPost() {
     try {
-      await addDoc(collection(db, "posts"), {
+      const docRef = await addDoc(collection(db, "posts"), {
         createdBy: userUid,
         text,
         likes: 0,
         comments: [],
         date: serverTimestamp(),
       });
+
+      const snapshot = await getDoc(docRef);
+      let date;
+      if (snapshot.exists()) {
+        date = snapshot.data().date.toDate().toDateString();
+        const postId = docRef.id;
+        addPost(date, postId);
+      }
       setText("");
     } catch {
       dispatch(
