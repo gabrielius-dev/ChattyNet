@@ -31,18 +31,13 @@ import { PostData, PostsInterface } from "../../app/types/postType";
 export default function Posts() {
   const dispatch = useAppDispatch();
   const posts = useAppSelector((state) => state.posts.posts);
-
   const [lastVisiblePost, setLastVisiblePost] =
     useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [loadingMorePosts, setLoadingMorePosts] = useState(false);
   const [morePostsExist, setMorePostsExist] = useState(true);
   const userUID = useAppSelector((state) => state.user.uid);
   const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
-  const [likingInProgress, setLikingInProgress] = useState(false);
-
-  // TODO: add new post to posts array so user can see his new post immediately
-  // TODO: change heart icon color after it is clicked
-  // TODO: implement comments
+  const [processingLikePosts, setProcessingLikePosts] = useState<string[]>([]);
 
   const getInitialPosts = useCallback(async () => {
     const q1 = query(
@@ -77,7 +72,6 @@ export default function Posts() {
         } as PostsInterface)
     );
 
-    // Get user liked posts
     let likedPosts: string[];
     if (isLoggedIn) {
       const docRef = doc(db, "users", userUID);
@@ -102,12 +96,11 @@ export default function Posts() {
         photoURL: matchingObject?.photoURL,
       } as PostData;
     });
-    console.log("Posts loading is called!");
     return postsWithUserInfo;
   }, [isLoggedIn, userUID]);
 
   const loadMorePosts = useCallback(async () => {
-    console.log("More Posts loading is called!");
+    if (!morePostsExist) return;
     setLoadingMorePosts(true);
     const q1 = query(
       collection(db, "posts"),
@@ -115,17 +108,13 @@ export default function Posts() {
       startAfter(lastVisiblePost),
       limit(20)
     );
-
     const querySnapshot1 = await getDocs(q1);
-    console.log(querySnapshot1.empty);
     if (querySnapshot1.empty) {
       setLoadingMorePosts(false);
       setMorePostsExist(false);
       return;
     }
-
     setLastVisiblePost(querySnapshot1.docs[querySnapshot1.docs.length - 1]);
-
     const usersUID = [
       ...new Set(querySnapshot1.docs.map((doc) => doc.data().createdBy)),
     ];
@@ -147,7 +136,6 @@ export default function Posts() {
         } as PostsInterface)
     );
 
-    // Get user liked posts
     let likedPosts: string[];
     if (isLoggedIn) {
       const docRef = doc(db, "users", userUID);
@@ -160,6 +148,7 @@ export default function Posts() {
         (item) => item.id === post.createdBy
       );
       let hasLiked = null;
+
       if (isLoggedIn)
         if (likedPosts.includes(post.postId)) hasLiked = true;
         else hasLiked = false;
@@ -174,9 +163,7 @@ export default function Posts() {
     });
 
     dispatch(setPosts(postsWithUserInfo));
-
-    //dispatch
-  }, [dispatch, isLoggedIn, lastVisiblePost, userUID]);
+  }, [dispatch, isLoggedIn, lastVisiblePost, morePostsExist, userUID]);
 
   useEffect(() => {
     async function getAndSetPosts() {
@@ -195,30 +182,25 @@ export default function Posts() {
         if (!loadingMorePosts || morePostsExist) loadMorePosts();
       }
     }
-
     document.addEventListener("scroll", onScroll);
-
     return () => document.removeEventListener("scroll", onScroll);
   }, [loadMorePosts, loadingMorePosts, morePostsExist]);
 
   const handleLikeClick = useCallback(
     async (id: string) => {
-      // Not the best solution to handle if person clicks like button
-      // But it works
       // If checking wouldn't exist then after non-stop like clicking the like count gets incorrect
-      if (likingInProgress) {
+      if (processingLikePosts.includes(id)) {
         dispatch(setErrorMessage("Wait before liking again!"));
         dispatch(setIsSnackbarOpen(true));
         return;
       }
       try {
-        setLikingInProgress(true);
+        setProcessingLikePosts((currentPosts) => [...currentPosts, id]);
         const batch = writeBatch(db);
 
         const docRef = doc(db, "users", userUID);
         const querySnapshot = await getDoc(docRef);
         const likedPosts = querySnapshot.data()?.likedPosts;
-        console.log(likedPosts);
 
         if (likedPosts.includes(id)) {
           batch.update(docRef, {
@@ -237,7 +219,9 @@ export default function Posts() {
         }
 
         await batch.commit();
-        setLikingInProgress(false);
+        setProcessingLikePosts((currentPosts) =>
+          currentPosts.filter((post) => post !== id)
+        );
         dispatch(changePostInfoAfterLiking(id));
       } catch {
         dispatch(
@@ -246,7 +230,7 @@ export default function Posts() {
         dispatch(setIsSnackbarOpen(true));
       }
     },
-    [dispatch, likingInProgress, userUID]
+    [dispatch, processingLikePosts, userUID]
   );
 
   return (
