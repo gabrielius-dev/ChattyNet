@@ -52,7 +52,6 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(false);
-      console.log(user);
       if (user && !isAuthenticating) {
         const docRef = doc(db, "users", user.uid);
         // Get the document
