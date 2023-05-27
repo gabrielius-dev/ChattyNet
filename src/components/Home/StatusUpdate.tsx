@@ -46,6 +46,11 @@ const StatusUpdate = () => {
   };
 
   async function submitPost() {
+    if (!text) {
+      dispatch(setErrorMessage("Enter something before posting."));
+      dispatch(setIsSnackbarOpen(true));
+      return;
+    }
     try {
       const docRef = await addDoc(collection(db, "posts"), {
         createdBy: userUid,
