@@ -10,6 +10,7 @@ export default function Home() {
         borderRight: "1px solid rgba(0, 0, 0, 0.12)",
         width: "52vw",
         maxWidth: "1000px",
+        boxSizing: "content-box",
       }}
     >
       <StatusUpdate />
