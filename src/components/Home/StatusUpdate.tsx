@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   addDoc,
   collection,
@@ -29,6 +29,7 @@ const StatusUpdate = () => {
   const username = useAppSelector((state) => state.user.username);
   const fullName = useAppSelector((state) => state.user.fullName);
   const [text, setText] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const addPost = async (date: string, postId: string) => {
     const post: PostData = {
@@ -47,6 +48,7 @@ const StatusUpdate = () => {
 
   async function submitPost() {
     if (!text) {
+      inputRef.current?.focus();
       dispatch(setErrorMessage("Enter something before posting."));
       dispatch(setIsSnackbarOpen(true));
       return;
@@ -110,6 +112,7 @@ const StatusUpdate = () => {
                 onChange={(e) => setText(e.target.value)}
                 value={text}
                 inputProps={{ maxLength: 1000 }}
+                inputRef={inputRef}
               />
             </Grid>
             <Grid item xs={12} container>
