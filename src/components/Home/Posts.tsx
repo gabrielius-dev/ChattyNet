@@ -15,7 +15,6 @@ import {
   orderBy,
   query,
   startAfter,
-  where,
   writeBatch,
 } from "firebase/firestore";
 import { db } from "../../app/firebase/firebase";
@@ -26,7 +25,8 @@ import {
   clearAllPosts,
   setPosts,
 } from "../../app/features/postsSlice";
-import { PostData, PostsInterface } from "../../app/types/postType";
+import { PostData, PostInterface } from "../../app/types/postType";
+import { getUsersInfo } from "../../app/helperFunctions";
 
 export default function Posts() {
   const dispatch = useAppDispatch();
@@ -50,26 +50,18 @@ export default function Posts() {
     if (querySnapshot1.empty) return;
 
     setLastVisiblePost(querySnapshot1.docs[querySnapshot1.docs.length - 1]);
-
     const usersUID = [
       ...new Set(querySnapshot1.docs.map((doc) => doc.data().createdBy)),
     ];
-    const q2 = query(collection(db, "users"), where("uid", "in", usersUID));
-    const querySnapshot2 = await getDocs(q2);
-    const usersInfo = querySnapshot2.docs.map((doc) => ({
-      id: doc.id,
-      username: doc.data().username,
-      fullName: doc.data().fullName,
-      photoURL: doc.data().photoURL || null,
-    }));
+    const usersInfo = await getUsersInfo(usersUID);
 
-    const postsWithoutUserInfo: PostsInterface[] = querySnapshot1.docs.map(
+    const postsWithoutUserInfo: PostInterface[] = querySnapshot1.docs.map(
       (doc) =>
         ({
           ...doc.data(),
           postId: doc.id,
           date: doc.data().date.toDate().toDateString(),
-        } as PostsInterface)
+        } as PostInterface)
     );
 
     let likedPosts: string[];
@@ -118,22 +110,15 @@ export default function Posts() {
     const usersUID = [
       ...new Set(querySnapshot1.docs.map((doc) => doc.data().createdBy)),
     ];
-    const q2 = query(collection(db, "users"), where("uid", "in", usersUID));
-    const querySnapshot2 = await getDocs(q2);
-    const usersInfo = querySnapshot2.docs.map((doc) => ({
-      id: doc.id,
-      username: doc.data().username,
-      fullName: doc.data().fullName,
-      photoURL: doc.data().photoURL || null,
-    }));
+    const usersInfo = await getUsersInfo(usersUID);
 
-    const postsWithoutUserInfo: PostsInterface[] = querySnapshot1.docs.map(
+    const postsWithoutUserInfo: PostInterface[] = querySnapshot1.docs.map(
       (doc) =>
         ({
           ...doc.data(),
           postId: doc.id,
           date: doc.data().date.toDate().toDateString(),
-        } as PostsInterface)
+        } as PostInterface)
     );
 
     let likedPosts: string[];
@@ -218,10 +203,10 @@ export default function Posts() {
           });
         }
 
-        await batch.commit();
         setProcessingLikePosts((currentPosts) =>
           currentPosts.filter((post) => post !== id)
         );
+        await batch.commit();
         dispatch(changePostInfoAfterLiking(id));
       } catch {
         dispatch(
@@ -235,8 +220,8 @@ export default function Posts() {
 
   return (
     <Stack direction="column">
-      {posts.map((post, i) => (
-        <Post {...post} key={i} handleLikeClick={handleLikeClick} />
+      {posts.map((post) => (
+        <Post {...post} key={post.postId} handleLikeClick={handleLikeClick} />
       ))}
     </Stack>
   );
