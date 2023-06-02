@@ -28,6 +28,14 @@ export const postsSlice = createSlice({
         return post;
       });
     },
+    changePostInfoAfterCommenting: (state, action: PayloadAction<string>) => {
+      state.posts = state.posts.map((post) => {
+        if (post.postId === action.payload) {
+          return { ...post, commentsCount: post.commentsCount + 1 };
+        }
+        return post;
+      });
+    },
     addNewPost: (state, action: PayloadAction<PostData>) => {
       state.posts = [action.payload, ...state.posts];
     },
@@ -38,6 +46,7 @@ export const {
   setPosts,
   clearAllPosts,
   changePostInfoAfterLiking,
+  changePostInfoAfterCommenting,
   addNewPost,
 } = postsSlice.actions;
 export default postsSlice.reducer;
