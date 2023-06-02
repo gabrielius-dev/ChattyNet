@@ -39,7 +39,7 @@ const StatusUpdate = () => {
       date,
       text,
       likes: 0,
-      comments: [],
+      commentsCount: 0,
       postId,
       hasLiked: false,
     };
@@ -58,17 +58,17 @@ const StatusUpdate = () => {
         createdBy: userUid,
         text,
         likes: 0,
-        comments: [],
+        commentsCount: 0,
         date: serverTimestamp(),
       });
 
       const snapshot = await getDoc(docRef);
-      let date;
       if (snapshot.exists()) {
-        date = snapshot.data().date.toDate().toDateString();
+        const date = snapshot.data().date.toDate().toDateString();
         const postId = docRef.id;
         addPost(date, postId);
       }
+
       setText("");
     } catch {
       dispatch(
