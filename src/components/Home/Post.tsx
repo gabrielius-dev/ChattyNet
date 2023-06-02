@@ -8,6 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import ChatBubbleOutlineRoundedIcon from "@mui/icons-material/ChatBubbleOutlineRounded";
+import ChatBubbleRoundedIcon from "@mui/icons-material/ChatBubbleRounded";
 import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import SendIcon from "@mui/icons-material/Send";
@@ -354,7 +355,7 @@ const Post = memo(
               <Button
                 onClick={handleCommentClick}
                 sx={{
-                  color: "#808080",
+                  color: showCommentSection ? LIGHT_BLUE_COLOR : "#808080",
                   "&:hover": {
                     backgroundColor: "inherit",
                     color: LIGHT_BLUE_COLOR,
@@ -363,7 +364,11 @@ const Post = memo(
                   gap: 1,
                 }}
               >
-                <ChatBubbleOutlineRoundedIcon />
+                {showCommentSection ? (
+                  <ChatBubbleRoundedIcon />
+                ) : (
+                  <ChatBubbleOutlineRoundedIcon />
+                )}
                 {formatNumber(commentsCount)}
               </Button>
             </Grid>
