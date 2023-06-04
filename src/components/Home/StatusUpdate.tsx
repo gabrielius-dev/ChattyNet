@@ -28,6 +28,9 @@ const StatusUpdate = () => {
   const photoURL = useAppSelector((state) => state.user.photoURL);
   const username = useAppSelector((state) => state.user.username);
   const fullName = useAppSelector((state) => state.user.fullName);
+  const information = useAppSelector((state) => state.user.information);
+  const followers = useAppSelector((state) => state.user.followers);
+  const following = useAppSelector((state) => state.user.following);
   const [text, setText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -36,6 +39,9 @@ const StatusUpdate = () => {
       username,
       fullName,
       photoURL,
+      information,
+      followers,
+      following,
       date,
       text,
       likes: 0,
