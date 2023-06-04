@@ -13,18 +13,14 @@ import { auth, db } from "../../app/firebase/firebase";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { setUser } from "../../app/features/userSlice";
 import { setErrorMessage, setIsSnackbarOpen } from "../../app/features/UISlice";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { isUsernameTaken } from "./helperFunctions";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 
 export default function RemainingSignUpSetup() {
   const dispatch = useAppDispatch();
   const initialUsername = useAppSelector((state) => state.user.username);
-  const [username, setUsername] = useState("");
-  // For some dumb reason sometimes it doesn't work if I don't use useEffect
-  useEffect(() => {
-    setUsername(initialUsername || "");
-  }, [initialUsername]);
+  const [username, setUsername] = useState(initialUsername);
   const usernameRef = useRef<HTMLInputElement | null>(null);
   const [formErrorMessage, setFormErrorMessage] = useState("");
   const userUID = useAppSelector((state) => state.user.uid);
