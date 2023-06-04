@@ -66,6 +66,15 @@ const Post = memo(
     const currentUserPhotoURL = useAppSelector((state) => state.user.photoURL);
     const currentUserUsername = useAppSelector((state) => state.user.username);
     const currentUserFullName = useAppSelector((state) => state.user.fullName);
+    const currentUserInformation = useAppSelector(
+      (state) => state.user.information
+    );
+    const currentUserFollowers = useAppSelector(
+      (state) => state.user.followers
+    );
+    const currentUserFollowing = useAppSelector(
+      (state) => state.user.following
+    );
     const [comments, setComments] = useState<CommentData[]>([]);
     const [processingLikeComments, setProcessingLikeComments] = useState<
       string[]
@@ -125,6 +134,9 @@ const Post = memo(
             username: matchingObject?.username,
             fullName: matchingObject?.fullName,
             photoURL: matchingObject?.photoURL,
+            information: matchingObject?.information,
+            followers: matchingObject?.followers,
+            following: matchingObject?.following,
           } as CommentData;
         }
       );
@@ -176,6 +188,9 @@ const Post = memo(
               photoURL: currentUserPhotoURL,
               username: currentUserUsername,
               fullName: currentUserFullName,
+              information: currentUserInformation,
+              followers: currentUserFollowers,
+              following: currentUserFollowing,
               hasLikedComment: false,
             },
             ...comments,
@@ -293,6 +308,9 @@ const Post = memo(
             username: matchingObject?.username,
             fullName: matchingObject?.fullName,
             photoURL: matchingObject?.photoURL,
+            information: matchingObject?.information,
+            followers: matchingObject?.followers,
+            following: matchingObject?.following,
           } as CommentData;
         }
       );

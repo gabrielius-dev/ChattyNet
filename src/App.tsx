@@ -67,14 +67,20 @@ function App() {
         setUserExists(true);
         const username = documentSnapshot.get("username");
         const fullName = documentSnapshot.get("fullName");
+        const information = documentSnapshot.get("information");
+        const followers = documentSnapshot.get("followers");
+        const following = documentSnapshot.get("following");
         dispatch(
           setUser({
-            fullName: fullName,
-            username: username,
+            fullName,
+            username,
             uid: user.uid,
             email: user.email,
-            isSignUpSetupFinished: isSignUpSetupFinished,
-            photoURL: photoURL,
+            isSignUpSetupFinished,
+            photoURL,
+            information,
+            followers,
+            following,
           })
         );
         if (isSignUpSetupFinished) {

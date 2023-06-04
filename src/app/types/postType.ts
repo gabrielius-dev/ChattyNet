@@ -1,3 +1,12 @@
+export interface PostInterface {
+  date: string;
+  text: string;
+  likes: number;
+  commentsCount: number;
+  createdBy: string;
+  postId: string;
+}
+
 export interface PostData {
   username: string;
   fullName: string;
@@ -8,15 +17,9 @@ export interface PostData {
   postId: string;
   commentsCount: number;
   hasLiked: boolean | null;
-}
-
-export interface PostInterface {
-  date: string;
-  text: string;
-  likes: number;
-  commentsCount: number;
-  createdBy: string;
-  postId: string;
+  information: string;
+  following: number;
+  followers: number;
 }
 
 type handleLikeClickType = (id: string) => void;
@@ -32,6 +35,9 @@ export interface PostComponentArguments {
   commentsCount: number;
   handleLikeClick: handleLikeClickType;
   hasLiked: boolean | null;
+  information: string;
+  following: number;
+  followers: number;
 }
 
 export interface CommentInterface {
@@ -52,6 +58,9 @@ export interface CommentData {
   hasLikedComment: boolean | null;
   likes: number;
   commentId: string;
+  information: string;
+  following: number;
+  followers: number;
 }
 
 export interface CommentComponentArguments {
@@ -64,4 +73,7 @@ export interface CommentComponentArguments {
   handleLikeClick: handleLikeClickType;
   hasLikedComment: boolean | null;
   commentId: string;
+  information: string;
+  following: number;
+  followers: number;
 }

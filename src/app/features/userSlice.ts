@@ -9,6 +9,9 @@ interface userState {
   isSignUpSetupFinished: boolean;
   isAuthenticating: boolean;
   photoURL: string;
+  information: string;
+  followers: number;
+  following: number;
 }
 
 const initialState: userState = {
@@ -20,6 +23,9 @@ const initialState: userState = {
   isSignUpSetupFinished: false,
   isAuthenticating: false,
   photoURL: "",
+  information: "",
+  followers: 0,
+  following: 0,
 };
 
 export const userSlice = createSlice({

@@ -9,6 +9,9 @@ export const getUsersInfo = async (usersUID: string[]) => {
     username: doc.data().username,
     fullName: doc.data().fullName,
     photoURL: doc.data().photoURL || null,
+    information: doc.data().information,
+    followers: doc.data().followers,
+    following: doc.data().following,
   }));
   return usersInfo;
 };

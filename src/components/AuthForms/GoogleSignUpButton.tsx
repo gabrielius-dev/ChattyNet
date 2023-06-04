@@ -41,7 +41,6 @@ const GoogleSignUpButton = () => {
         dispatch(setErrorMessage("Account already exists!"));
         dispatch(setIsSnackbarOpen(true));
       } else {
-        dispatch(setUser({ isAuthenticating: false }));
         const fullName = user.displayName || "";
 
         const username = await generateUniqueUsername(fullName);
@@ -56,10 +55,12 @@ const GoogleSignUpButton = () => {
             likedPosts: [],
             followers: 0,
             following: 0,
+            information: "",
           }),
           setDoc(docRef, { email }),
         ]);
         dispatch(hideSignUpForm());
+        dispatch(setUser({ isAuthenticating: false }));
       }
     } catch {
       dispatch(
@@ -68,6 +69,8 @@ const GoogleSignUpButton = () => {
         )
       );
       dispatch(setIsSnackbarOpen(true));
+    } finally {
+      dispatch(setUser({ isAuthenticating: false }));
     }
   };
   return (

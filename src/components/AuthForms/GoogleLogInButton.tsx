@@ -10,6 +10,7 @@ import {
 } from "../../app/features/UISlice";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { isUsernameTaken } from "./helperFunctions";
+import { setUser } from "../../app/features/userSlice";
 
 const GoogleLogInButton = () => {
   const dispatch = useAppDispatch();
@@ -26,6 +27,7 @@ const GoogleLogInButton = () => {
     const provider = new GoogleAuthProvider();
 
     try {
+      dispatch(setUser({ isAuthenticating: true }));
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const email = user.email ?? "";
@@ -48,11 +50,14 @@ const GoogleLogInButton = () => {
             likedPosts: [],
             followers: 0,
             following: 0,
+            information: "",
           }),
           setDoc(docRef, { email }),
         ]);
         dispatch(hideLogInForm());
+        dispatch(setUser({ isAuthenticating: false }));
       } else {
+        dispatch(setUser({ isAuthenticating: false }));
         dispatch(hideLogInForm());
       }
     } catch {
@@ -62,6 +67,8 @@ const GoogleLogInButton = () => {
         )
       );
       dispatch(setIsSnackbarOpen(true));
+    } finally {
+      dispatch(setUser({ isAuthenticating: false }));
     }
   };
   return (

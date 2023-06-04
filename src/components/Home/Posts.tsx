@@ -86,6 +86,9 @@ export default function Posts() {
         username: matchingObject?.username,
         fullName: matchingObject?.fullName,
         photoURL: matchingObject?.photoURL,
+        information: matchingObject?.information,
+        followers: matchingObject?.followers,
+        following: matchingObject?.following,
       } as PostData;
     });
     return postsWithUserInfo;
@@ -144,6 +147,9 @@ export default function Posts() {
         username: matchingObject?.username,
         fullName: matchingObject?.fullName,
         photoURL: matchingObject?.photoURL,
+        information: matchingObject?.information,
+        followers: matchingObject?.followers,
+        following: matchingObject?.following,
       } as PostData;
     });
 

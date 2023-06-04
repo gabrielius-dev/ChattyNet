@@ -88,6 +88,7 @@ export default function CreateAccountForm() {
           likedPosts: [],
           followers: 0,
           following: 0,
+          information:''
         }),
       ]);
       dispatch(hideSignUpForm());
