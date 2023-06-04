@@ -92,7 +92,7 @@ export default function RemainingSignUpSetup() {
                 input.focus();
               }
             }}
-            inputProps={{ autoFocus: true }}
+            inputProps={{ autoFocus: true, maxLength: 30 }}
           />
         </Stack>
         <FormHelperText error>{formErrorMessage}</FormHelperText>

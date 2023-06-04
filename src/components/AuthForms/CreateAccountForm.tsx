@@ -62,7 +62,7 @@ export default function CreateAccountForm() {
       return;
     }
 
-    const fullName = firstName + lastName;
+    const fullName = firstName + " " + lastName;
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -88,7 +88,7 @@ export default function CreateAccountForm() {
           likedPosts: [],
           followers: 0,
           following: 0,
-          information:''
+          information: "",
         }),
       ]);
       dispatch(hideSignUpForm());
@@ -121,12 +121,14 @@ export default function CreateAccountForm() {
             <TextField
               label="First name"
               value={firstName}
+              inputProps={{ maxLength: 60 }}
               onChange={(e) => setFirstName(e.target.value)}
               required
             />
             <TextField
               label="Last name"
               value={lastName}
+              inputProps={{ maxLength: 60 }}
               onChange={(e) => setLastName(e.target.value)}
               required
             />
@@ -135,6 +137,7 @@ export default function CreateAccountForm() {
             label="Username"
             value={username}
             inputRef={usernameRef}
+            inputProps={{ maxLength: 30 }}
             onChange={(e) => setUsername(e.target.value)}
             required
           />
