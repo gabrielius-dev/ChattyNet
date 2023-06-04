@@ -18,6 +18,7 @@ const GoogleSignUpButton = () => {
   async function generateUniqueUsername(fullName: string) {
     let username = fullName.replaceAll(" ", "");
     while (await isUsernameTaken(username)) {
+      if (username.length > 30) username = username.substring(0, 26);
       username = `${username}${Math.floor(Math.random() * 9000 + 1000)}`;
     }
     return username;
