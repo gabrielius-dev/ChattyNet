@@ -35,9 +35,10 @@ export default function Sidebar() {
   const handleNavigation = useCallback(
     (route: string) => {
       if (route === "home") navigate("/");
+      else if (route === "profile") navigate(username);
       else navigate(route);
     },
-    [navigate]
+    [navigate, username]
   );
 
   const data = useMemo(() => {
