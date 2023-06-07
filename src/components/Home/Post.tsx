@@ -43,6 +43,8 @@ import { db } from "../../app/firebase/firebase";
 import { formatNumber, getUsersInfo } from "../../app/helperFunctions";
 import Comment from "./Comment";
 import { changePostInfoAfterCommenting } from "../../app/features/postsSlice";
+import ProfileSummary from "./ProfileSummary";
+import { Link } from "react-router-dom";
 
 const Post = memo(
   ({
@@ -56,6 +58,9 @@ const Post = memo(
     commentsCount,
     handleLikeClick,
     hasLiked,
+    information,
+    followers,
+    following,
   }: PostComponentArguments) => {
     const dispatch = useAppDispatch();
     const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
@@ -83,6 +88,13 @@ const Post = memo(
     const [lastVisibleComment, setLastVisibleComment] =
       useState<QueryDocumentSnapshot<DocumentData> | null>(null);
     const [moreCommentsExist, setMoreCommentsExist] = useState(true);
+    const [showProfileSummary, setShowProfileSummary] = useState(false);
+    const [profileSummaryCoords, setProfileSummaryCoords] = useState({
+      x: 0,
+      y: 0,
+    });
+    const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+    const [hovered, setHovered] = useState(false);
 
     function displayError() {
       dispatch(setErrorMessage("You must sign in to like."));
@@ -323,12 +335,26 @@ const Post = memo(
       setComments([]);
     }, [isLoggedIn]);
 
+    function handleShowProfileSummary(
+      e: React.MouseEvent<HTMLSpanElement, MouseEvent>
+    ) {
+      const bounds = (e.target as HTMLSpanElement).getBoundingClientRect();
+      const x = e.clientX - bounds.left;
+      const y = e.clientY - bounds.top;
+      setProfileSummaryCoords({ x, y });
+      const timer = setTimeout(() => {
+        setShowProfileSummary(true);
+      }, 1000);
+      setTimer(timer);
+    }
+
     return (
       <Grid
         container
         spacing={2}
         padding={1}
         sx={{
+          position: "relative",
           width: "52vw",
           maxWidth: "1000px",
           borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
@@ -337,11 +363,21 @@ const Post = memo(
           padding: 0,
           "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.03)" },
         }}
+        // For safety
+        onMouseOut={() => {
+          if (timer) clearTimeout(timer);
+          setShowProfileSummary(false);
+        }}
       >
         <Grid item>
-          <Avatar src={photoURL ?? undefined}>
-            {!photoURL && username[0].toUpperCase()}
-          </Avatar>
+          <Link
+            to={username}
+            style={{ color: "inherit", textDecoration: "none" }}
+          >
+            <Avatar src={photoURL ?? undefined} sx={{ cursor: "pointer" }}>
+              {!photoURL && username[0].toUpperCase()}
+            </Avatar>
+          </Link>
         </Grid>
         <Grid item xs={12} sm container spacing={0.3}>
           <Grid
@@ -351,11 +387,46 @@ const Post = memo(
             spacing={1}
             sx={{ display: "flex", alignItems: "center" }}
           >
-            <Grid item>
-              <Typography sx={{ fontWeight: "bold" }}>{fullName}</Typography>
+            <Grid
+              item
+              onMouseOver={(e) => handleShowProfileSummary(e)}
+              onMouseOut={() => {
+                if (timer) clearTimeout(timer);
+              }}
+            >
+              <Link
+                style={{
+                  fontWeight: "bold",
+                  wordBreak: "break-all",
+                  color: "black",
+                  textDecoration: hovered ? "underline" : "none",
+                  cursor: "pointer",
+                }}
+                to={username}
+                onMouseOver={() => setHovered(true)}
+                onMouseOut={() => setHovered(false)}
+              >
+                {fullName}
+              </Link>
             </Grid>
-            <Grid item>
-              <Typography color="#adadad">@{username}</Typography>
+            <Grid
+              item
+              onMouseOver={(e) => handleShowProfileSummary(e)}
+              onMouseOut={() => {
+                if (timer) clearTimeout(timer);
+              }}
+            >
+              <Link
+                style={{
+                  wordBreak: "break-all",
+                  textDecoration: "none",
+                  cursor: "pointer",
+                  color: "#adadad",
+                }}
+                to={username}
+              >
+                @{username}
+              </Link>
             </Grid>
             <Grid item>
               <Typography color="#adadad">{date}</Typography>
@@ -363,7 +434,11 @@ const Post = memo(
           </Grid>
           <Grid item xs={12} container>
             <Grid item>
-              <Typography variant="body1" paddingRight={1}>
+              <Typography
+                variant="body1"
+                paddingRight={1}
+                sx={{ wordBreak: "break-all" }}
+              >
                 {text}
               </Typography>
             </Grid>
@@ -468,6 +543,30 @@ const Post = memo(
                 </Button>
               </Grid>
             )}
+          </Grid>
+        )}
+        {showProfileSummary && (
+          <Grid
+            item
+            onMouseOver={() => setShowProfileSummary(true)}
+            onMouseOut={() => setShowProfileSummary(false)}
+            sx={{
+              position: "absolute",
+              zIndex: 10000,
+              width: "280px",
+              minHeight: "fit-content",
+              top: profileSummaryCoords.y,
+              left: profileSummaryCoords.x,
+            }}
+          >
+            <ProfileSummary
+              photoURL={photoURL}
+              fullName={fullName}
+              username={username}
+              information={information}
+              followers={followers}
+              following={following}
+            />
           </Grid>
         )}
       </Grid>

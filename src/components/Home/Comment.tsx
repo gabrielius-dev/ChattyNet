@@ -6,6 +6,9 @@ import { setErrorMessage, setIsSnackbarOpen } from "../../app/features/UISlice";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
 import { formatNumber } from "../../app/helperFunctions";
+import { useState } from "react";
+import ProfileSummary from "./ProfileSummary";
+import { Link } from "react-router-dom";
 
 export default function Comment({
   photoURL,
@@ -17,11 +20,35 @@ export default function Comment({
   hasLikedComment,
   handleLikeClick,
   commentId,
+  information,
+  followers,
+  following,
 }: CommentComponentArguments) {
   const dispatch = useAppDispatch();
+  const [showProfileSummary, setShowProfileSummary] = useState(false);
+  const [profileSummaryCoords, setProfileSummaryCoords] = useState({
+    x: 0,
+    y: 0,
+  });
+  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  const [hovered, setHovered] = useState(false);
+
   function displayError() {
     dispatch(setErrorMessage("You must sign in to like."));
     dispatch(setIsSnackbarOpen(true));
+  }
+
+  function handleShowProfileSummary(
+    e: React.MouseEvent<HTMLSpanElement, MouseEvent>
+  ) {
+    const bounds = (e.target as HTMLSpanElement).getBoundingClientRect();
+    const x = e.clientX - bounds.left;
+    const y = e.clientY - bounds.top;
+    setProfileSummaryCoords({ x, y });
+    const timer = setTimeout(() => {
+      setShowProfileSummary(true);
+    }, 1000);
+    setTimer(timer);
   }
 
   return (
@@ -30,6 +57,7 @@ export default function Comment({
       spacing={2}
       padding={1}
       sx={{
+        position: "relative",
         width: "52vw",
         maxWidth: "1000px",
         borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
@@ -38,11 +66,20 @@ export default function Comment({
         padding: 0,
         "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.03)" },
       }}
+      onMouseOut={() => {
+        if (timer) clearTimeout(timer);
+        setShowProfileSummary(false);
+      }}
     >
       <Grid item>
-        <Avatar src={photoURL ?? undefined}>
-          {!photoURL && username[0].toUpperCase()}
-        </Avatar>
+        <Link
+          to={username}
+          style={{ color: "inherit", textDecoration: "none" }}
+        >
+          <Avatar src={photoURL ?? undefined} sx={{ cursor: "pointer" }}>
+            {!photoURL && username[0].toUpperCase()}
+          </Avatar>
+        </Link>
       </Grid>
       <Grid item xs={12} sm container spacing={0.3}>
         <Grid
@@ -52,11 +89,46 @@ export default function Comment({
           spacing={1}
           sx={{ display: "flex", alignItems: "center" }}
         >
-          <Grid item>
-            <Typography sx={{ fontWeight: "bold" }}>{fullName}</Typography>
+          <Grid
+            item
+            onMouseOver={(e) => handleShowProfileSummary(e)}
+            onMouseOut={() => {
+              if (timer) clearTimeout(timer);
+            }}
+          >
+            <Link
+              style={{
+                fontWeight: "bold",
+                wordBreak: "break-all",
+                color: "black",
+                textDecoration: hovered ? "underline" : "none",
+                cursor: "pointer",
+              }}
+              to={username}
+              onMouseOver={() => setHovered(true)}
+              onMouseOut={() => setHovered(false)}
+            >
+              {fullName}
+            </Link>
           </Grid>
-          <Grid item>
-            <Typography color="#adadad">@{username}</Typography>
+          <Grid
+            item
+            onMouseOver={(e) => handleShowProfileSummary(e)}
+            onMouseOut={() => {
+              if (timer) clearTimeout(timer);
+            }}
+          >
+            <Link
+              style={{
+                wordBreak: "break-all",
+                textDecoration: "none",
+                cursor: "pointer",
+                color: "#adadad",
+              }}
+              to={username}
+            >
+              @{username}
+            </Link>
           </Grid>
           <Grid item>
             <Typography color="#adadad">{date}</Typography>
@@ -64,7 +136,11 @@ export default function Comment({
         </Grid>
         <Grid item xs={12} container>
           <Grid item>
-            <Typography variant="body1" paddingRight={1}>
+            <Typography
+              variant="body1"
+              paddingRight={1}
+              sx={{ wordBreak: "break-all" }}
+            >
               {text}
             </Typography>
           </Grid>
@@ -97,6 +173,30 @@ export default function Comment({
           </Grid>
         </Grid>
       </Grid>
+      {showProfileSummary && (
+        <Grid
+          item
+          onMouseOver={() => setShowProfileSummary(true)}
+          onMouseOut={() => setShowProfileSummary(false)}
+          sx={{
+            position: "absolute",
+            zIndex: 10000,
+            width: "280px",
+            minHeight: "fit-content",
+            top: `${profileSummaryCoords.y}px`,
+            left: `${profileSummaryCoords.x}px`,
+          }}
+        >
+          <ProfileSummary
+            photoURL={photoURL}
+            fullName={fullName}
+            username={username}
+            information={information}
+            followers={followers}
+            following={following}
+          />
+        </Grid>
+      )}
     </Grid>
   );
 }
