@@ -75,6 +75,7 @@ export default function CreateAccountForm() {
       await Promise.all([
         setDoc(doc(db, "usernames", username), {
           username,
+          uid: user.uid,
         }),
         setDoc(doc(db, "emails", email), {
           email,
@@ -89,6 +90,7 @@ export default function CreateAccountForm() {
           followers: 0,
           following: 0,
           information: "",
+          tweetsCount: 0,
         }),
       ]);
       dispatch(hideSignUpForm());

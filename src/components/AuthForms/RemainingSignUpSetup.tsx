@@ -44,7 +44,7 @@ export default function RemainingSignUpSetup() {
     }
 
     await Promise.all([
-      setDoc(doc(db, "usernames", username), { username }),
+      setDoc(doc(db, "usernames", username), { username, uid: userUID }),
       updateDoc(doc(db, "users", userUID), {
         username,
         isSignUpSetupFinished: true,

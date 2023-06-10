@@ -51,6 +51,7 @@ const GoogleLogInButton = () => {
             followers: 0,
             following: 0,
             information: "",
+            tweetsCount: 0,
           }),
           setDoc(docRef, { email }),
         ]);
