@@ -1,5 +1,5 @@
 import { Avatar, Button, Grid, Typography } from "@mui/material";
-import { LIGHT_BLUE_COLOR } from "../../styles/colors";
+import { LIGHT_BLUE_COLOR, LIGHT_GRAY_COLOR } from "../../styles/colors";
 import { CommentComponentArguments } from "../../app/types/postType";
 import { useAppDispatch } from "../../app/hooks";
 import { setErrorMessage, setIsSnackbarOpen } from "../../app/features/UISlice";
@@ -123,7 +123,7 @@ export default function Comment({
                 wordBreak: "break-all",
                 textDecoration: "none",
                 cursor: "pointer",
-                color: "#adadad",
+                color: LIGHT_GRAY_COLOR,
               }}
               to={username}
             >
@@ -131,7 +131,7 @@ export default function Comment({
             </Link>
           </Grid>
           <Grid item>
-            <Typography color="#adadad">{date}</Typography>
+            <Typography color={LIGHT_GRAY_COLOR}>{date}</Typography>
           </Grid>
         </Grid>
         <Grid item xs={12} container>

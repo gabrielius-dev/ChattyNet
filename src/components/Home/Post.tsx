@@ -12,7 +12,7 @@ import ChatBubbleRoundedIcon from "@mui/icons-material/ChatBubbleRounded";
 import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import SendIcon from "@mui/icons-material/Send";
-import { LIGHT_BLUE_COLOR } from "../../styles/colors";
+import { LIGHT_BLUE_COLOR, LIGHT_GRAY_COLOR } from "../../styles/colors";
 import {
   CommentData,
   CommentInterface,
@@ -421,7 +421,7 @@ const Post = memo(
                   wordBreak: "break-all",
                   textDecoration: "none",
                   cursor: "pointer",
-                  color: "#adadad",
+                  color: LIGHT_GRAY_COLOR,
                 }}
                 to={username}
               >
@@ -429,7 +429,7 @@ const Post = memo(
               </Link>
             </Grid>
             <Grid item>
-              <Typography color="#adadad">{date}</Typography>
+              <Typography color={LIGHT_GRAY_COLOR}>{date}</Typography>
             </Grid>
           </Grid>
           <Grid item xs={12} container>

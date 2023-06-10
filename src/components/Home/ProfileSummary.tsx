@@ -1,6 +1,7 @@
 import { Avatar, Grid, Paper, Typography } from "@mui/material";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { LIGHT_GRAY_COLOR } from "../../styles/colors";
 
 interface ProfileSummaryArguments {
   photoURL: string | null;
@@ -56,7 +57,7 @@ export default function ProfileSummary({
                 wordBreak: "break-all",
                 textDecoration: "none",
                 cursor: "pointer",
-                color: "#adadad",
+                color: LIGHT_GRAY_COLOR,
               }}
               to={username}
             >
@@ -73,7 +74,7 @@ export default function ProfileSummary({
               <Typography fontWeight="bold">{following}</Typography>
             </Grid>
             <Grid item>
-              <Typography color="#adadad">Following</Typography>
+              <Typography color={LIGHT_GRAY_COLOR}>Following</Typography>
             </Grid>
           </Grid>
           <Grid item container spacing={1} xs={6}>
@@ -81,7 +82,7 @@ export default function ProfileSummary({
               <Typography fontWeight="bold">{followers}</Typography>
             </Grid>
             <Grid item>
-              <Typography color="#adadad">Followers</Typography>
+              <Typography color={LIGHT_GRAY_COLOR}>Followers</Typography>
             </Grid>
           </Grid>
         </Grid>
