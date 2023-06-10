@@ -13,8 +13,11 @@ import { useState, useRef } from "react";
 import {
   addDoc,
   collection,
+  doc,
   getDoc,
+  increment,
   serverTimestamp,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../../app/firebase/firebase";
 import { setErrorMessage, setIsSnackbarOpen } from "../../app/features/UISlice";
@@ -67,7 +70,9 @@ const StatusUpdate = () => {
         commentsCount: 0,
         date: serverTimestamp(),
       });
-
+      await updateDoc(doc(db, "users", userUid), {
+        tweetsCount: increment(1),
+      });
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
         const date = snapshot.data().date.toDate().toDateString();
