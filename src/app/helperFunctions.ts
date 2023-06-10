@@ -1,10 +1,17 @@
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "./firebase/firebase";
 
 export const getUsersInfo = async (usersUID: string[]) => {
-  const q2 = query(collection(db, "users"), where("uid", "in", usersUID));
-  const querySnapshot2 = await getDocs(q2);
-  const usersInfo = querySnapshot2.docs.map((doc) => ({
+  const q = query(collection(db, "users"), where("uid", "in", usersUID));
+  const querySnapshot = await getDocs(q);
+  const usersInfo = querySnapshot.docs.map((doc) => ({
     id: doc.id,
     username: doc.data().username,
     fullName: doc.data().fullName,
@@ -14,6 +21,22 @@ export const getUsersInfo = async (usersUID: string[]) => {
     following: doc.data().following,
   }));
   return usersInfo;
+};
+export const getUserInfo = async (userUID: string) => {
+  const docRef = doc(db, "users", userUID);
+  const docSnap = await getDoc(docRef);
+  const userInfo = {
+    uid: docSnap.data()?.uid,
+    username: docSnap.data()?.username,
+    fullName: docSnap.data()?.fullName,
+    photoURL: docSnap.data()?.photoURL || null,
+    headerPhotoURL: docSnap.data()?.headerPhotoURL || null,
+    information: docSnap.data()?.information,
+    followers: docSnap.data()?.followers,
+    following: docSnap.data()?.following,
+    tweetsCount: docSnap.data()?.tweetsCount,
+  };
+  return userInfo;
 };
 
 export function formatNumber(number: number) {
