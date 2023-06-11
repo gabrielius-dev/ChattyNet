@@ -26,6 +26,7 @@ export default function Sidebar() {
   const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
   const photoURL = useAppSelector((state) => state.user.photoURL);
   const username = useAppSelector((state) => state.user.username);
+  const fullName = useAppSelector((state) => state.user.fullName);
   let currentLocation = useAppSelector(
     (state) => state.location.location
   ).slice(1);
@@ -64,7 +65,7 @@ export default function Sidebar() {
               src={photoURL}
               sx={{ height: 36, width: 36, marginLeft: "-5px" }}
             >
-              {!photoURL && username[0].toUpperCase()}
+              {!photoURL && fullName[0].toUpperCase()}
             </Avatar>
           ),
         },
@@ -77,7 +78,7 @@ export default function Sidebar() {
         },
       ];
     }
-  }, [isLoggedIn, photoURL, username]);
+  }, [isLoggedIn, photoURL, fullName]);
 
   const getColor = (label: string) =>
     currentLocation === label.toLowerCase() ? LIGHT_BLUE_COLOR : "black";

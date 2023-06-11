@@ -30,7 +30,7 @@ export default function ProfileSummary({
             style={{ color: "inherit", textDecoration: "none" }}
           >
             <Avatar src={photoURL ?? undefined} sx={{ cursor: "pointer" }}>
-              {!photoURL && username[0].toUpperCase()}
+              {!photoURL && fullName[0].toUpperCase()}
             </Avatar>
           </Link>
         </Grid>

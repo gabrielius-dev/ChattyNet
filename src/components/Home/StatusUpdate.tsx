@@ -110,7 +110,7 @@ const StatusUpdate = () => {
         <Grid container spacing={2} padding={1}>
           <Grid item sx={{ paddingTop: "1.5rem !important" }}>
             <Avatar src={photoURL}>
-              {!photoURL && username[0].toUpperCase()}
+              {!photoURL && fullName[0].toUpperCase()}
             </Avatar>
           </Grid>
           <Grid item xs={12} sm container spacing={2}>
