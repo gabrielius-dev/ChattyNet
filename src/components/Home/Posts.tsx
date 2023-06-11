@@ -87,8 +87,8 @@ export default function Posts() {
         fullName: matchingObject?.fullName,
         photoURL: matchingObject?.photoURL,
         information: matchingObject?.information,
-        followers: matchingObject?.followers,
-        following: matchingObject?.following,
+        followers: matchingObject?.followersCount,
+        following: matchingObject?.followingCount,
       } as PostData;
     });
     return postsWithUserInfo;
@@ -148,8 +148,8 @@ export default function Posts() {
         fullName: matchingObject?.fullName,
         photoURL: matchingObject?.photoURL,
         information: matchingObject?.information,
-        followers: matchingObject?.followers,
-        following: matchingObject?.following,
+        followers: matchingObject?.followersCount,
+        following: matchingObject?.followingCount,
       } as PostData;
     });
 

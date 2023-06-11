@@ -8,7 +8,7 @@ import {
   setErrorMessage,
   setIsSnackbarOpen,
 } from "../../app/features/UISlice";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { Timestamp, doc, getDoc, setDoc } from "firebase/firestore";
 import { isUsernameTaken } from "./helperFunctions";
 import { setUser } from "../../app/features/userSlice";
 
@@ -54,10 +54,11 @@ const GoogleSignUpButton = () => {
             photoURL: user.photoURL,
             isSignUpSetupFinished: false,
             likedPosts: [],
-            followers: 0,
-            following: 0,
             information: "",
             tweetsCount: 0,
+            followers: [],
+            following: [],
+            creationDate: Timestamp.now(),
           }),
           setDoc(docRef, { email }),
         ]);

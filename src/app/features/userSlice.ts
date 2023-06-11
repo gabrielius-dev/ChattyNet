@@ -10,8 +10,8 @@ interface userState {
   isAuthenticating: boolean;
   photoURL: string;
   information: string;
-  followers: number;
-  following: number;
+  followersCount: number;
+  followingCount: number;
 }
 
 const initialState: userState = {
@@ -24,8 +24,8 @@ const initialState: userState = {
   isAuthenticating: false,
   photoURL: "",
   information: "",
-  followers: 0,
-  following: 0,
+  followersCount: 0,
+  followingCount: 0,
 };
 
 export const userSlice = createSlice({

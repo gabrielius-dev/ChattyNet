@@ -75,10 +75,10 @@ const Post = memo(
       (state) => state.user.information
     );
     const currentUserFollowers = useAppSelector(
-      (state) => state.user.followers
+      (state) => state.user.followersCount
     );
     const currentUserFollowing = useAppSelector(
-      (state) => state.user.following
+      (state) => state.user.followingCount
     );
     const [comments, setComments] = useState<CommentData[]>([]);
     const [processingLikeComments, setProcessingLikeComments] = useState<
@@ -147,8 +147,8 @@ const Post = memo(
             fullName: matchingObject?.fullName,
             photoURL: matchingObject?.photoURL,
             information: matchingObject?.information,
-            followers: matchingObject?.followers,
-            following: matchingObject?.following,
+            followers: matchingObject?.followersCount,
+            following: matchingObject?.followingCount,
           } as CommentData;
         }
       );
@@ -321,8 +321,8 @@ const Post = memo(
             fullName: matchingObject?.fullName,
             photoURL: matchingObject?.photoURL,
             information: matchingObject?.information,
-            followers: matchingObject?.followers,
-            following: matchingObject?.following,
+            followers: matchingObject?.followersCount,
+            following: matchingObject?.followingCount,
           } as CommentData;
         }
       );
@@ -375,7 +375,7 @@ const Post = memo(
             style={{ color: "inherit", textDecoration: "none" }}
           >
             <Avatar src={photoURL ?? undefined} sx={{ cursor: "pointer" }}>
-              {!photoURL && username[0].toUpperCase()}
+              {!photoURL && fullName[0].toUpperCase()}
             </Avatar>
           </Link>
         </Grid>
@@ -503,7 +503,8 @@ const Post = memo(
               <Grid item container spacing={1}>
                 <Grid item>
                   <Avatar src={currentUserPhotoURL ?? undefined}>
-                    {!currentUserPhotoURL && username[0].toUpperCase()}
+                    {!currentUserPhotoURL &&
+                      currentUserFullName[0].toUpperCase()}
                   </Avatar>
                 </Grid>
                 <Grid item xs>

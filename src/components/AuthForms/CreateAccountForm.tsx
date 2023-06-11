@@ -17,7 +17,7 @@ import { useRef, useState } from "react";
 import { auth } from "../../app/firebase/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { db } from "../../app/firebase/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { Timestamp, doc, setDoc } from "firebase/firestore";
 import { isUsernameTaken } from "./helperFunctions";
 import { useAppDispatch } from "../../app/hooks";
 import { hideSignUpForm, showLogInForm } from "../../app/features/UISlice";
@@ -73,24 +73,22 @@ export default function CreateAccountForm() {
 
       const user = userCredential.user;
       await Promise.all([
-        setDoc(doc(db, "usernames", username), {
-          username,
-          uid: user.uid,
-        }),
         setDoc(doc(db, "emails", email), {
           email,
         }),
         setDoc(doc(db, "users", user.uid), {
           uid: user.uid,
           fullName,
-          username,
           email,
-          isSignUpSetupFinished: true,
+          username,
+          photoURL: user.photoURL,
+          isSignUpSetupFinished: false,
           likedPosts: [],
-          followers: 0,
-          following: 0,
           information: "",
           tweetsCount: 0,
+          followers: [],
+          following: [],
+          creationDate: Timestamp.now(),
         }),
       ]);
       dispatch(hideSignUpForm());

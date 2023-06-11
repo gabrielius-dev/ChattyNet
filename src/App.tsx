@@ -68,8 +68,8 @@ function App() {
         const username = documentSnapshot.get("username");
         const fullName = documentSnapshot.get("fullName");
         const information = documentSnapshot.get("information");
-        const followers = documentSnapshot.get("followers");
-        const following = documentSnapshot.get("following");
+        const followersCount = documentSnapshot.get("followers").length;
+        const followingCount = documentSnapshot.get("following").length;
         dispatch(
           setUser({
             fullName,
@@ -79,8 +79,8 @@ function App() {
             isSignUpSetupFinished,
             photoURL,
             information,
-            followers,
-            following,
+            followersCount,
+            followingCount,
           })
         );
         if (isSignUpSetupFinished) {

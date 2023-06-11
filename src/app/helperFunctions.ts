@@ -17,8 +17,8 @@ export const getUsersInfo = async (usersUID: string[]) => {
     fullName: doc.data().fullName,
     photoURL: doc.data().photoURL || null,
     information: doc.data().information,
-    followers: doc.data().followers,
-    following: doc.data().following,
+    followersCount: doc.data().followers.length,
+    followingCount: doc.data().following.length,
   }));
   return usersInfo;
 };
@@ -32,9 +32,12 @@ export const getUserInfo = async (userUID: string) => {
     photoURL: docSnap.data()?.photoURL || null,
     headerPhotoURL: docSnap.data()?.headerPhotoURL || null,
     information: docSnap.data()?.information,
+    followersCount: docSnap.data()?.followers.length,
+    followingCount: docSnap.data()?.following.length,
+    tweetsCount: docSnap.data()?.tweetsCount,
+    creationDate: docSnap.data()?.creationDate,
     followers: docSnap.data()?.followers,
     following: docSnap.data()?.following,
-    tweetsCount: docSnap.data()?.tweetsCount,
   };
   return userInfo;
 };

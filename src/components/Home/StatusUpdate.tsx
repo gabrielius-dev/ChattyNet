@@ -32,8 +32,8 @@ const StatusUpdate = () => {
   const username = useAppSelector((state) => state.user.username);
   const fullName = useAppSelector((state) => state.user.fullName);
   const information = useAppSelector((state) => state.user.information);
-  const followers = useAppSelector((state) => state.user.followers);
-  const following = useAppSelector((state) => state.user.following);
+  const followers = useAppSelector((state) => state.user.followersCount);
+  const following = useAppSelector((state) => state.user.followingCount);
   const [text, setText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 

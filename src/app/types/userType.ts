@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface UserInterface {
   uid: string;
   username: string;
@@ -5,7 +7,8 @@ export interface UserInterface {
   photoURL: string | null;
   headerPhotoURL: string | null;
   information: string;
-  followers: number;
-  following: number;
+  followersCount: number;
+  followingCount: number;
+  creationDate: Timestamp;
   tweetsCount: number;
 }
