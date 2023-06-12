@@ -9,6 +9,8 @@ export interface UserInterface {
   information: string;
   followersCount: number;
   followingCount: number;
+  following: string[];
+  followers: string[];
   creationDate: Timestamp;
   tweetsCount: number;
 }
