@@ -66,7 +66,7 @@ export default function ProfileSummary({
           </Grid>
         </Grid>
         <Grid item xs={12}>
-          <Typography>{information}</Typography>
+          <Typography sx={{ wordBreak: "break-all" }}>{information}</Typography>
         </Grid>
         <Grid item container xs={12}>
           <Grid item container spacing={1} xs={6}>
