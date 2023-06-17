@@ -18,19 +18,21 @@ import {
   Avatar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { UserInterface } from "../../app/types/userType";
 import { formatNumber, getUserInfo } from "../../app/helperFunctions";
 import CircularProgressComponent from "../CircularProgress";
-import { useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { LIGHT_GRAY_COLOR } from "../../styles/colors";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import { showEditProfileForm } from "../../app/features/UISlice";
+import EditProfileForm from "./EditProfileForm";
+import { setUserProfileDetails } from "../../app/features/profileSlice";
 
 export default function Profile() {
   // TODO: think about how the profile should look like if account owner checks it. Followers list
   const { username } = useParams();
   const [accountExists, setAccountExists] = useState(false);
   const [userUID, setUserUID] = useState("");
-  const [userDetails, setUserDetails] = useState<UserInterface | null>(null);
+  const userDetails = useAppSelector((state) => state.profile);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
@@ -38,6 +40,11 @@ export default function Profile() {
   const [hoveredFollowing, setHoveredFollowing] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const currentUserUID = useAppSelector((state) => state.user.uid);
+  const currentUserUsername = useAppSelector((state) => state.user.username);
+  const dispatch = useAppDispatch();
+  const isEditProfileFormShowing = useAppSelector(
+    (state) => state.UI.isEditProfileFormShowing
+  );
 
   useEffect(() => {
     async function getUsernameExists() {
@@ -49,13 +56,20 @@ export default function Profile() {
     }
 
     async function getUserDetails() {
-      if (userUID) setUserDetails(await getUserInfo(userUID));
+      if (userUID) {
+        const userInfo = await getUserInfo(userUID);
+        const fixedUserInfo = {
+          ...userInfo,
+          creationDate: userInfo.creationDate.toDate().toDateString(),
+        };
+        dispatch(setUserProfileDetails(fixedUserInfo));
+      }
     }
 
     Promise.all([getUsernameExists(), getUserDetails()]).then(() => {
       setLoading(false);
     });
-  }, [username, userUID, isLoggedIn]);
+  }, [username, userUID, isLoggedIn, dispatch]);
 
   useEffect(() => {
     if (userDetails) {
@@ -74,13 +88,14 @@ export default function Profile() {
       batch.update(doc(db, "users", currentUserUID), {
         following: arrayRemove(userDetails.uid),
       });
-      setUserDetails({
-        ...userDetails,
-        followersCount: userDetails.followersCount - 1,
-        followers: userDetails?.followers.filter(
-          (follower) => follower !== currentUserUID
-        ),
-      });
+      dispatch(
+        setUserProfileDetails({
+          followersCount: userDetails.followersCount - 1,
+          followers: userDetails?.followers.filter(
+            (follower) => follower !== currentUserUID
+          ),
+        })
+      );
     } else {
       batch.update(docRef, {
         followers: arrayUnion(currentUserUID),
@@ -88,14 +103,19 @@ export default function Profile() {
       batch.update(doc(db, "users", currentUserUID), {
         following: arrayUnion(userDetails.uid),
       });
-      setUserDetails({
-        ...userDetails,
-        followersCount: userDetails.followersCount + 1,
-        followers: [...userDetails.followers, currentUserUID],
-      });
+      dispatch(
+        setUserProfileDetails({
+          followersCount: userDetails.followersCount + 1,
+          followers: [...userDetails.followers, currentUserUID],
+        })
+      );
     }
     await batch.commit();
     setIsFollowing(!isFollowing);
+  }
+
+  function openEditProfile() {
+    dispatch(showEditProfileForm());
   }
 
   return (
@@ -120,7 +140,10 @@ export default function Profile() {
             </Grid>
             <Grid item container direction="column" xs>
               <Grid item>
-                <Typography variant="h6" fontWeight="bold">
+                <Typography
+                  variant="h6"
+                  sx={{ wordBreak: "break-all", fontWeight: "bold" }}
+                >
                   {accountExists ? userDetails?.fullName : "Profile"}
                 </Typography>
               </Grid>
@@ -173,7 +196,8 @@ export default function Profile() {
                     fontSize: "50px",
                   }}
                 >
-                  {userDetails?.fullName[0].toUpperCase()}
+                  {userDetails.fullName.length > 0 &&
+                    userDetails.fullName[0].toUpperCase()}
                 </Avatar>
               ) : (
                 <Box
@@ -187,33 +211,56 @@ export default function Profile() {
                 />
               )}
             </Grid>
-            {accountExists && isLoggedIn && (
-              <Grid item ml="auto">
-                <Button
-                  variant="contained"
-                  sx={{
-                    color: "white",
-                    backgroundColor: "black",
-                    borderRadius: "20px",
-                    textTransform: "none",
-                    pr: 2,
-                    pl: 2,
-                    "&:hover": {
-                      backgroundColor: "rgba(0,0,0,0.8)",
-                    },
-                  }}
-                  onClick={handleFollow}
-                >
-                  {isFollowing ? "Unfollow" : "Follow"}
-                </Button>
-              </Grid>
-            )}
+            {accountExists &&
+              isLoggedIn &&
+              currentUserUsername !== username && (
+                <Grid item ml="auto">
+                  <Button
+                    variant="contained"
+                    sx={{
+                      color: "white",
+                      backgroundColor: "black",
+                      borderRadius: "20px",
+                      textTransform: "none",
+                      pr: 2,
+                      pl: 2,
+                      "&:hover": {
+                        backgroundColor: "rgba(0,0,0,0.8)",
+                      },
+                    }}
+                    onClick={handleFollow}
+                  >
+                    {isFollowing ? "Unfollow" : "Follow"}
+                  </Button>
+                </Grid>
+              )}
+            {accountExists &&
+              isLoggedIn &&
+              currentUserUsername === username && (
+                <Grid item ml="auto">
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      borderRadius: "20px",
+                      textTransform: "none",
+                      pr: 2,
+                      pl: 2,
+                    }}
+                    onClick={openEditProfile}
+                  >
+                    Edit Profile
+                  </Button>
+                </Grid>
+              )}
           </Grid>
 
           {accountExists ? (
             <Grid item container sx={{ pr: 2, pl: 2 }} direction="column">
               <Grid item>
-                <Typography variant="h6" fontWeight="bold">
+                <Typography
+                  variant="h6"
+                  sx={{ wordBreak: "break-all", fontWeight: "bold" }}
+                >
                   {userDetails?.fullName}
                 </Typography>
               </Grid>
@@ -225,7 +272,10 @@ export default function Profile() {
             </Grid>
           ) : (
             <Grid item sx={{ pr: 2, pl: 2 }}>
-              <Typography variant="h6" fontWeight="bold">
+              <Typography
+                variant="h6"
+                sx={{ wordBreak: "break-all", fontWeight: "bold" }}
+              >
                 @{username}
               </Typography>
             </Grid>
@@ -245,7 +295,7 @@ export default function Profile() {
                 </Grid>
                 <Grid item>
                   <Typography sx={{ color: LIGHT_GRAY_COLOR }}>
-                    Joined {userDetails?.creationDate?.toDate().toDateString()}
+                    Joined {userDetails?.creationDate}
                   </Typography>
                 </Grid>
               </Grid>
@@ -331,6 +381,7 @@ export default function Profile() {
       ) : (
         <CircularProgressComponent />
       )}
+      {isEditProfileFormShowing && userDetails !== null && <EditProfileForm />}
     </Box>
   );
 }
