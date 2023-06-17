@@ -19,7 +19,12 @@ import {
 } from "firebase/firestore";
 import { db } from "../../app/firebase/firebase";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { setErrorMessage, setIsSnackbarOpen } from "../../app/features/UISlice";
+import {
+  hideHomeContent,
+  setErrorMessage,
+  setIsSnackbarOpen,
+  showHomeContent,
+} from "../../app/features/UISlice";
 import {
   changePostInfoAfterLiking,
   clearAllPosts,
@@ -27,6 +32,7 @@ import {
 } from "../../app/features/postsSlice";
 import { PostData, PostInterface } from "../../app/types/postType";
 import { getUsersInfo } from "../../app/helperFunctions";
+import CircularProgressComponent from "../CircularProgress";
 
 export default function Posts() {
   const dispatch = useAppDispatch();
@@ -38,6 +44,9 @@ export default function Posts() {
   const userUID = useAppSelector((state) => state.user.uid);
   const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
   const [processingLikePosts, setProcessingLikePosts] = useState<string[]>([]);
+  const isHomeContentLoading = useAppSelector(
+    (state) => state.UI.isHomeContentLoading
+  );
 
   const getInitialPosts = useCallback(async () => {
     const q1 = query(
@@ -158,9 +167,11 @@ export default function Posts() {
 
   useEffect(() => {
     async function getAndSetPosts() {
+      dispatch(hideHomeContent());
       const posts = (await getInitialPosts()) || [];
       dispatch(clearAllPosts());
       dispatch(setPosts(posts));
+      dispatch(showHomeContent());
     }
     getAndSetPosts();
   }, [dispatch, getInitialPosts]);
@@ -224,7 +235,9 @@ export default function Posts() {
     [dispatch, processingLikePosts, userUID]
   );
 
-  return (
+  return isHomeContentLoading ? (
+    <CircularProgressComponent />
+  ) : (
     <Stack direction="column">
       {posts.map((post) => (
         <Post {...post} key={post.postId} handleLikeClick={handleLikeClick} />
