@@ -8,6 +8,8 @@ interface UIState {
   errorMessage: string;
   isSnackbarOpen: boolean;
   isLoginReminderShowing: boolean;
+  isEditProfileFormShowing: boolean;
+  isHomeContentLoading: boolean;
 }
 
 const initialState: UIState = {
@@ -18,6 +20,8 @@ const initialState: UIState = {
   errorMessage: "",
   isSnackbarOpen: false,
   isLoginReminderShowing: false,
+  isEditProfileFormShowing: false,
+  isHomeContentLoading: true,
 };
 
 export const UISlice = createSlice({
@@ -58,12 +62,23 @@ export const UISlice = createSlice({
     hideLoginReminder: (state) => {
       state.isLoginReminderShowing = false;
     },
-
     setErrorMessage: (state, action: PayloadAction<string>) => {
       state.errorMessage = action.payload;
     },
     setIsSnackbarOpen: (state, action: PayloadAction<boolean>) => {
       state.isSnackbarOpen = action.payload;
+    },
+    showEditProfileForm: (state) => {
+      state.isEditProfileFormShowing = true;
+    },
+    hideEditProfileForm: (state) => {
+      state.isEditProfileFormShowing = false;
+    },
+    showHomeContent: (state) => {
+      state.isHomeContentLoading = false;
+    },
+    hideHomeContent: (state) => {
+      state.isHomeContentLoading = true;
     },
   },
 });
@@ -81,5 +96,9 @@ export const {
   hideLoginReminder,
   setErrorMessage,
   setIsSnackbarOpen,
+  showEditProfileForm,
+  hideEditProfileForm,
+  showHomeContent,
+  hideHomeContent,
 } = UISlice.actions;
 export default UISlice.reducer;
