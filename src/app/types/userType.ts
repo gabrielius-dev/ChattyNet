@@ -1,6 +1,4 @@
-import { Timestamp } from "firebase/firestore";
-
-export interface UserInterface {
+export interface UserProfileInterface {
   uid: string;
   username: string;
   fullName: string;
@@ -11,6 +9,6 @@ export interface UserInterface {
   followingCount: number;
   following: string[];
   followers: string[];
-  creationDate: Timestamp;
+  creationDate: string | null;
   tweetsCount: number;
 }
