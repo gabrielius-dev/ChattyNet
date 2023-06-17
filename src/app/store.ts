@@ -3,6 +3,7 @@ import userReducer from "./features/userSlice";
 import locationReducer from "./features/locationSlice";
 import UIReducer from "./features/UISlice";
 import postsReducer from "./features/postsSlice";
+import profileReducer from "./features/profileSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     location: locationReducer,
     UI: UIReducer,
     posts: postsReducer,
+    profile: profileReducer,
   },
 });
 
