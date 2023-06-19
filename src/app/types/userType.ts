@@ -12,3 +12,13 @@ export interface UserProfileInterface {
   creationDate: string | null;
   tweetsCount: number;
 }
+
+export interface SmallUserInformationInterface {
+  id: string;
+  username: string;
+  fullName: string;
+  photoURL: string | null;
+  information: string;
+  followersCount: number;
+  followingCount: number;
+}
