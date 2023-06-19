@@ -15,6 +15,8 @@ import {
 } from "./app/features/UISlice";
 import { doc, getDoc } from "firebase/firestore";
 import RemainingSignUpSetup from "./components/AuthForms/RemainingSignUpSetup";
+import Followers from "./components/Profile/Followers";
+import Following from "./components/Profile/Following";
 
 const Home = lazy(() => import("./components/Home/Home"));
 const Notifications = lazy(
@@ -111,6 +113,8 @@ function App() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
           <Route path="/:username" element={<Profile />} />
+          <Route path="/:username/followers" element={<Followers />} />
+          <Route path="/:username/following" element={<Following />} />
         </Routes>
         {isLogInFormShowing && <LogInForm />}
         {isSignUpFormShowing && <SignUpForm />}
