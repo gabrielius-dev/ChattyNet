@@ -73,7 +73,7 @@ export default function Comment({
     >
       <Grid item>
         <Link
-          to={username}
+          to={`/${username}`}
           style={{ color: "inherit", textDecoration: "none" }}
         >
           <Avatar src={photoURL ?? undefined} sx={{ cursor: "pointer" }}>
@@ -104,7 +104,7 @@ export default function Comment({
                 textDecoration: hovered ? "underline" : "none",
                 cursor: "pointer",
               }}
-              to={username}
+              to={`/${username}`}
               onMouseOver={() => setHovered(true)}
               onMouseOut={() => setHovered(false)}
             >
@@ -125,7 +125,7 @@ export default function Comment({
                 cursor: "pointer",
                 color: LIGHT_GRAY_COLOR,
               }}
-              to={username}
+              to={`/${username}`}
             >
               @{username}
             </Link>

@@ -26,7 +26,7 @@ export default function ProfileSummary({
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <Link
-            to={username}
+            to={`/${username}`}
             style={{ color: "inherit", textDecoration: "none" }}
           >
             <Avatar src={photoURL ?? undefined} sx={{ cursor: "pointer" }}>
@@ -44,7 +44,7 @@ export default function ProfileSummary({
                 textDecoration: hovered ? "underline" : "none",
                 cursor: "pointer",
               }}
-              to={username}
+              to={`/${username}`}
               onMouseOver={() => setHovered(true)}
               onMouseOut={() => setHovered(false)}
             >
@@ -59,7 +59,7 @@ export default function ProfileSummary({
                 cursor: "pointer",
                 color: LIGHT_GRAY_COLOR,
               }}
-              to={username}
+              to={`/${username}`}
             >
               @{username}
             </Link>
