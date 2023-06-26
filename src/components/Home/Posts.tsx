@@ -28,7 +28,7 @@ import {
 import {
   changePostInfoAfterLiking,
   clearAllPosts,
-  setPosts,
+  addPosts,
 } from "../../app/features/postsSlice";
 import { PostData, PostInterface } from "../../app/types/postType";
 import { getUsersInfo } from "../../app/helperFunctions";
@@ -49,6 +49,7 @@ export default function Posts() {
   );
 
   const getInitialPosts = useCallback(async () => {
+    dispatch(clearAllPosts());
     const q1 = query(
       collection(db, "posts"),
       orderBy("date", "desc"),
@@ -101,7 +102,7 @@ export default function Posts() {
       } as PostData;
     });
     return postsWithUserInfo;
-  }, [isLoggedIn, userUID]);
+  }, [dispatch, isLoggedIn, userUID]);
 
   const loadMorePosts = useCallback(async () => {
     if (!morePostsExist) return;
@@ -162,18 +163,18 @@ export default function Posts() {
       } as PostData;
     });
 
-    dispatch(setPosts(postsWithUserInfo));
+    dispatch(addPosts(postsWithUserInfo));
   }, [dispatch, isLoggedIn, lastVisiblePost, morePostsExist, userUID]);
 
   useEffect(() => {
-    async function getAndSetPosts() {
+    async function getAndAddPosts() {
       dispatch(hideHomeContent());
       const posts = (await getInitialPosts()) || [];
       dispatch(clearAllPosts());
-      dispatch(setPosts(posts));
+      dispatch(addPosts(posts));
       dispatch(showHomeContent());
     }
-    getAndSetPosts();
+    getAndAddPosts();
   }, [dispatch, getInitialPosts]);
 
   useEffect(() => {
