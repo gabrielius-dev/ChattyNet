@@ -1,11 +1,22 @@
 import {
   arrayRemove,
   arrayUnion,
+  collection,
   doc,
   getDoc,
+  getDocs,
+  orderBy,
+  query,
+  limit,
   writeBatch,
+  QueryDocumentSnapshot,
+  DocumentData,
+  startAfter,
+  where,
+  increment,
+  documentId,
 } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { db } from "../../app/firebase/firebase";
 import {
@@ -18,17 +29,32 @@ import {
   Avatar,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { formatNumber, getUserInfo } from "../../app/helperFunctions";
+import {
+  formatNumber,
+  getUserInfo,
+  getUsersInfo,
+} from "../../app/helperFunctions";
 import CircularProgressComponent from "../CircularProgress";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { LIGHT_GRAY_COLOR } from "../../styles/colors";
+import { LIGHT_BLUE_COLOR, LIGHT_GRAY_COLOR } from "../../styles/colors";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import { showEditProfileForm } from "../../app/features/UISlice";
+import {
+  setErrorMessage,
+  setIsSnackbarOpen,
+  showEditProfileForm,
+} from "../../app/features/UISlice";
 import EditProfileForm from "./EditProfileForm";
 import { setUserProfileDetails } from "../../app/features/profileSlice";
+import { PostData, PostInterface } from "../../app/types/postType";
+import Post from "../Home/Post";
+import {
+  addPosts,
+  changePostInfoAfterLiking,
+  clearAllPosts,
+  setPosts,
+} from "../../app/features/postsSlice";
 
 export default function Profile() {
-  // TODO: think about how the profile should look like if account owner checks it. Followers list
   const { username } = useParams();
   const [accountExists, setAccountExists] = useState(false);
   const [userUID, setUserUID] = useState("");
@@ -45,6 +71,176 @@ export default function Profile() {
   const isEditProfileFormShowing = useAppSelector(
     (state) => state.UI.isEditProfileFormShowing
   );
+  type SelectedElementType = "Tweets" | "Likes";
+  const [currentElementSelected, setCurrentElementSelected] =
+    useState<SelectedElementType>("Tweets");
+  const posts = useAppSelector((state) => state.posts.posts);
+  const [lastVisiblePost, setLastVisiblePost] =
+    useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [morePostsExist, setMorePostsExist] = useState(false);
+  const [processingLikePosts, setProcessingLikePosts] = useState<string[]>([]);
+  const [isFetching, setIsFetching] = useState(true);
+
+  const getInitialPosts = useCallback(async () => {
+    let q1, queryType, queryID;
+    // User uid
+    if (currentElementSelected === "Tweets") {
+      queryType = "Tweets";
+      queryID = userDetails.uid;
+    } else if (currentElementSelected === "Likes") {
+      queryType = "Likes";
+      queryID = userDetails.likedPosts;
+    }
+    if (queryType === "Tweets")
+      q1 = query(
+        collection(db, "posts"),
+        orderBy("date", "desc"),
+        where("createdBy", "==", queryID),
+        limit(20)
+      );
+    // User liked posts array
+    if (queryType === "Likes")
+      q1 = query(
+        collection(db, "posts"),
+        where(documentId(), "in", queryID),
+        limit(20)
+      );
+    if (!q1) return;
+    const querySnapshot1 = await getDocs(q1);
+    if (querySnapshot1.empty) return;
+    setMorePostsExist(querySnapshot1.docs.length === 20);
+
+    setLastVisiblePost(querySnapshot1.docs[querySnapshot1.docs.length - 1]);
+    const usersUID = [
+      ...new Set(querySnapshot1.docs.map((doc) => doc.data().createdBy)),
+    ];
+    const usersInfo = await getUsersInfo(usersUID);
+
+    const postsWithoutUserInfo: PostInterface[] = querySnapshot1.docs.map(
+      (doc) =>
+        ({
+          ...doc.data(),
+          postId: doc.id,
+          date: doc.data().date.toDate().toDateString(),
+        } as PostInterface)
+    );
+
+    let likedPosts: string[];
+    if (isLoggedIn) {
+      const docRef = doc(db, "users", currentUserUID);
+      const querySnapshot = await getDoc(docRef);
+      likedPosts = querySnapshot.data()?.likedPosts;
+    }
+
+    const postsWithUserInfo: PostData[] = postsWithoutUserInfo.map((post) => {
+      const matchingObject = usersInfo.find(
+        (item) => item.id === post.createdBy
+      );
+      let hasLiked = null;
+      if (isLoggedIn)
+        if (likedPosts.includes(post.postId)) hasLiked = true;
+        else hasLiked = false;
+
+      return {
+        ...post,
+        hasLiked,
+        username: matchingObject?.username,
+        fullName: matchingObject?.fullName,
+        photoURL: matchingObject?.photoURL,
+        information: matchingObject?.information,
+        followers: matchingObject?.followersCount,
+        following: matchingObject?.followingCount,
+      } as PostData;
+    });
+    return postsWithUserInfo;
+  }, [
+    currentElementSelected,
+    currentUserUID,
+    isLoggedIn,
+    userDetails.likedPosts,
+    userDetails.uid,
+  ]);
+
+  const loadMorePosts = async () => {
+    if (!morePostsExist) return;
+    let q1, queryType, queryID;
+    // User uid
+    if (currentElementSelected === "Tweets") {
+      queryType = "Tweets";
+      queryID = userDetails.uid;
+    } else if (currentElementSelected === "Likes") {
+      queryType = "Likes";
+      queryID = userDetails.likedPosts;
+    }
+
+    if (queryType === "Tweets")
+      q1 = query(
+        collection(db, "posts"),
+        orderBy("date", "desc"),
+        where("createdBy", "==", queryID),
+        startAfter(lastVisiblePost),
+        limit(20)
+      );
+    // User liked posts array
+    if (queryType === "Likes")
+      q1 = query(
+        collection(db, "posts"),
+        where(documentId(), "in", queryID),
+        startAfter(lastVisiblePost),
+        limit(20)
+      );
+
+    if (!q1) return;
+
+    const querySnapshot1 = await getDocs(q1);
+    if (querySnapshot1.empty) return;
+    setMorePostsExist(querySnapshot1.docs.length === 20);
+    setLastVisiblePost(querySnapshot1.docs[querySnapshot1.docs.length - 1]);
+    const usersUID = [
+      ...new Set(querySnapshot1.docs.map((doc) => doc.data().createdBy)),
+    ];
+    const usersInfo = await getUsersInfo(usersUID);
+
+    const postsWithoutUserInfo: PostInterface[] = querySnapshot1.docs.map(
+      (doc) =>
+        ({
+          ...doc.data(),
+          postId: doc.id,
+          date: doc.data().date.toDate().toDateString(),
+        } as PostInterface)
+    );
+
+    let likedPosts: string[];
+    if (isLoggedIn) {
+      const docRef = doc(db, "users", currentUserUID);
+      const querySnapshot = await getDoc(docRef);
+      likedPosts = querySnapshot.data()?.likedPosts;
+    }
+
+    const postsWithUserInfo: PostData[] = postsWithoutUserInfo.map((post) => {
+      const matchingObject = usersInfo.find(
+        (item) => item.id === post.createdBy
+      );
+      let hasLiked = null;
+
+      if (isLoggedIn)
+        if (likedPosts.includes(post.postId)) hasLiked = true;
+        else hasLiked = false;
+
+      return {
+        ...post,
+        hasLiked,
+        username: matchingObject?.username,
+        fullName: matchingObject?.fullName,
+        photoURL: matchingObject?.photoURL,
+        information: matchingObject?.information,
+        followers: matchingObject?.followersCount,
+        following: matchingObject?.followingCount,
+      } as PostData;
+    });
+
+    dispatch(addPosts(postsWithUserInfo));
+  };
 
   useEffect(() => {
     async function getUsernameExists() {
@@ -62,6 +258,7 @@ export default function Profile() {
           ...userInfo,
           creationDate: userInfo.creationDate.toDate().toDateString(),
         };
+
         dispatch(setUserProfileDetails(fixedUserInfo));
       }
     }
@@ -69,13 +266,26 @@ export default function Profile() {
     Promise.all([getUsernameExists(), getUserDetails()]).then(() => {
       setLoading(false);
     });
-  }, [username, userUID, isLoggedIn, dispatch]);
+  }, [dispatch, userUID, username]);
 
   useEffect(() => {
     if (userDetails) {
       setIsFollowing(userDetails?.followers.includes(currentUserUID));
     }
   }, [userDetails, currentUserUID]);
+
+  // if userDetails changes (edit Profile)
+  useEffect(() => {
+    async function reloadPosts() {
+      if (!userDetails.uid) return;
+      const returnedPosts = (await getInitialPosts()) || [];
+      dispatch(setPosts(returnedPosts));
+    }
+    reloadPosts();
+    return () => {
+      dispatch(clearAllPosts());
+    };
+  }, [currentElementSelected, dispatch, getInitialPosts, userDetails]);
 
   async function handleFollow() {
     if (!userDetails) return;
@@ -118,6 +328,99 @@ export default function Profile() {
     dispatch(showEditProfileForm());
   }
 
+  async function handleTweetsClick() {
+    setIsFetching(true);
+    setCurrentElementSelected("Tweets");
+    const returnedPosts = (await getInitialPosts()) || [];
+    dispatch(setPosts(returnedPosts));
+    setIsFetching(false);
+  }
+
+  async function handleLikesClick() {
+    setIsFetching(true);
+    setCurrentElementSelected("Likes");
+    const returnedPosts = (await getInitialPosts()) || [];
+    dispatch(setPosts(returnedPosts));
+    setIsFetching(false);
+  }
+
+  // Non-stop clicking Tweets and Likes can sometimes display wrong posts
+  // Edge case fix
+  useEffect(() => {
+    async function edgeCaseFix() {
+      if (isFetching) return;
+
+      if (
+        currentElementSelected === "Likes" &&
+        posts.length !== userDetails.likedPosts.length
+      ) {
+        const returnedPosts = (await getInitialPosts()) || [];
+        dispatch(setPosts(returnedPosts));
+      } else if (
+        currentElementSelected === "Tweets" &&
+        posts.length === userDetails.likedPosts.length
+      ) {
+        const returnedPosts = (await getInitialPosts()) || [];
+        dispatch(setPosts(returnedPosts));
+      }
+    }
+    edgeCaseFix();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    currentElementSelected,
+    dispatch,
+    getInitialPosts,
+    posts.length,
+    userDetails.likedPosts.length,
+  ]);
+
+  const handleLikeClick = useCallback(
+    async (id: string) => {
+      // If checking wouldn't exist then after non-stop like clicking the like count gets incorrect
+      if (processingLikePosts.includes(id)) {
+        dispatch(setErrorMessage("Wait before liking again!"));
+        dispatch(setIsSnackbarOpen(true));
+        return;
+      }
+      try {
+        setProcessingLikePosts((currentPosts) => [...currentPosts, id]);
+        const batch = writeBatch(db);
+
+        const docRef = doc(db, "users", currentUserUID);
+        const querySnapshot = await getDoc(docRef);
+        const likedPosts = querySnapshot.data()?.likedPosts;
+
+        if (likedPosts.includes(id)) {
+          batch.update(docRef, {
+            likedPosts: arrayRemove(id),
+          });
+          batch.update(doc(db, "posts", id), {
+            likes: increment(-1),
+          });
+        } else {
+          batch.update(docRef, {
+            likedPosts: arrayUnion(id),
+          });
+          batch.update(doc(db, "posts", id), {
+            likes: increment(1),
+          });
+        }
+
+        setProcessingLikePosts((currentPosts) =>
+          currentPosts.filter((post) => post !== id)
+        );
+        await batch.commit();
+        dispatch(changePostInfoAfterLiking(id));
+      } catch (error) {
+        dispatch(
+          setErrorMessage("Error occurred while liking post. Try again later!")
+        );
+        dispatch(setIsSnackbarOpen(true));
+      }
+    },
+    [dispatch, processingLikePosts, currentUserUID]
+  );
+
   return (
     <Box
       sx={{
@@ -126,6 +429,8 @@ export default function Profile() {
         width: "52vw",
         maxWidth: "1000px",
         boxSizing: "content-box",
+        pb: 3,
+        marginBottom: !isLoggedIn ? "70px" : 0,
       }}
     >
       {!loading ? (
@@ -355,6 +660,95 @@ export default function Profile() {
                   </Link>
                 </Grid>
               </Grid>
+              <Grid
+                item
+                container
+                sx={{
+                  justifyContent: "center",
+                  width: "100%",
+                }}
+              >
+                <Grid
+                  item
+                  onClick={handleTweetsClick}
+                  sx={{
+                    flex: 1,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    p: 1,
+                    cursor: "pointer",
+                    color:
+                      currentElementSelected === "Tweets"
+                        ? "black"
+                        : LIGHT_GRAY_COLOR,
+                    fontWeight: "bold",
+                    transition: "background-color 0.3s ease",
+                    borderBottom: `2px solid ${
+                      currentElementSelected === "Tweets"
+                        ? LIGHT_BLUE_COLOR
+                        : "transparent"
+                    }`,
+                    "&:hover": {
+                      bgcolor: "#FAFAFA",
+                      color: "black",
+                    },
+                  }}
+                >
+                  Tweets
+                </Grid>
+                <Grid
+                  item
+                  onClick={handleLikesClick}
+                  sx={{
+                    flex: 1,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    p: 1,
+                    cursor: "pointer",
+                    color:
+                      currentElementSelected === "Likes"
+                        ? "black"
+                        : LIGHT_GRAY_COLOR,
+                    fontWeight: "bold",
+                    transition: "background-color 0.3s ease",
+                    borderBottom: `2px solid ${
+                      currentElementSelected === "Likes"
+                        ? LIGHT_BLUE_COLOR
+                        : "transparent"
+                    }`,
+                    "&:hover": {
+                      bgcolor: "#FAFAFA",
+                      color: "black",
+                    },
+                  }}
+                >
+                  Likes
+                </Grid>
+              </Grid>
+              <Grid item container>
+                {posts.map((post) => (
+                  <Post
+                    {...post}
+                    key={post.postId}
+                    handleLikeClick={handleLikeClick}
+                  />
+                ))}
+              </Grid>
+              {morePostsExist && (
+                <Grid item xs>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    onClick={async () => {
+                      await loadMorePosts();
+                    }}
+                  >
+                    Show more posts...
+                  </Button>
+                </Grid>
+              )}
             </Grid>
           )}
           {!accountExists && (
