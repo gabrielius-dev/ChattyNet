@@ -11,6 +11,7 @@ export interface UserProfileInterface {
   followers: string[];
   creationDate: string | null;
   tweetsCount: number;
+  likedPosts: string[];
 }
 
 export interface SmallUserInformationInterface {
