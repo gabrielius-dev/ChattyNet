@@ -14,6 +14,7 @@ const initialState: UserProfileInterface = {
   followers: [],
   creationDate: null,
   tweetsCount: 0,
+  likedPosts: [],
 };
 
 export const profileSlice = createSlice({
