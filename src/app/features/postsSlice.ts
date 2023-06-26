@@ -14,6 +14,9 @@ export const postsSlice = createSlice({
   initialState,
   reducers: {
     setPosts: (state, action: PayloadAction<PostData[]>) => {
+      state.posts = [...action.payload];
+    },
+    addPosts: (state, action: PayloadAction<PostData[]>) => {
       state.posts = [...state.posts, ...action.payload];
     },
     clearAllPosts: (state) => {
@@ -48,5 +51,6 @@ export const {
   changePostInfoAfterLiking,
   changePostInfoAfterCommenting,
   addNewPost,
+  addPosts,
 } = postsSlice.actions;
 export default postsSlice.reducer;
