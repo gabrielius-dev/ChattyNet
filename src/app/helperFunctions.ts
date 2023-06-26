@@ -38,6 +38,7 @@ export const getUserInfo = async (userUID: string) => {
     creationDate: docSnap.data()?.creationDate,
     followers: docSnap.data()?.followers,
     following: docSnap.data()?.following,
+    likedPosts: docSnap.data()?.likedPosts,
   };
   return userInfo;
 };
