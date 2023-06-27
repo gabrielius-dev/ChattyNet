@@ -15,6 +15,7 @@ import {
   where,
   increment,
   documentId,
+  updateDoc,
 } from "firebase/firestore";
 import { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -49,6 +50,7 @@ import { PostData, PostInterface } from "../../app/types/postType";
 import Post from "../Home/Post";
 import {
   addPosts,
+  changePostInfoAfterBookmarking,
   changePostInfoAfterLiking,
   clearAllPosts,
   setPosts,
@@ -80,6 +82,9 @@ export default function Profile() {
   const [morePostsExist, setMorePostsExist] = useState(false);
   const [processingLikePosts, setProcessingLikePosts] = useState<string[]>([]);
   const [isFetching, setIsFetching] = useState(true);
+  const [processingBookmarkPosts, setProcessingBookmarkPosts] = useState<
+    string[]
+  >([]);
 
   const getInitialPosts = useCallback(async () => {
     let q1, queryType, queryID;
@@ -126,24 +131,31 @@ export default function Profile() {
     );
 
     let likedPosts: string[];
+    let bookmarks: string[];
+
     if (isLoggedIn) {
-      const docRef = doc(db, "users", currentUserUID);
+      const docRef = doc(db, "users", userUID);
       const querySnapshot = await getDoc(docRef);
       likedPosts = querySnapshot.data()?.likedPosts;
+      bookmarks = querySnapshot.data()?.bookmarks;
     }
-
     const postsWithUserInfo: PostData[] = postsWithoutUserInfo.map((post) => {
       const matchingObject = usersInfo.find(
         (item) => item.id === post.createdBy
       );
       let hasLiked = null;
-      if (isLoggedIn)
+      let hasBookmarked = false;
+      if (isLoggedIn) {
         if (likedPosts.includes(post.postId)) hasLiked = true;
-        else hasLiked = false;
+        else if (!likedPosts.includes(post.postId)) hasLiked = false;
+        if (bookmarks.includes(post.postId)) hasBookmarked = true;
+        else if (!bookmarks.includes(post.postId)) hasBookmarked = false;
+      }
 
       return {
         ...post,
         hasLiked,
+        hasBookmarked,
         username: matchingObject?.username,
         fullName: matchingObject?.fullName,
         photoURL: matchingObject?.photoURL,
@@ -211,10 +223,13 @@ export default function Profile() {
     );
 
     let likedPosts: string[];
+    let bookmarks: string[];
+
     if (isLoggedIn) {
-      const docRef = doc(db, "users", currentUserUID);
+      const docRef = doc(db, "users", userUID);
       const querySnapshot = await getDoc(docRef);
       likedPosts = querySnapshot.data()?.likedPosts;
+      bookmarks = querySnapshot.data()?.bookmarks;
     }
 
     const postsWithUserInfo: PostData[] = postsWithoutUserInfo.map((post) => {
@@ -222,14 +237,18 @@ export default function Profile() {
         (item) => item.id === post.createdBy
       );
       let hasLiked = null;
-
-      if (isLoggedIn)
+      let hasBookmarked = false;
+      if (isLoggedIn) {
         if (likedPosts.includes(post.postId)) hasLiked = true;
-        else hasLiked = false;
+        else if (!likedPosts.includes(post.postId)) hasLiked = false;
+        if (bookmarks.includes(post.postId)) hasBookmarked = true;
+        else if (!bookmarks.includes(post.postId)) hasBookmarked = false;
+      }
 
       return {
         ...post,
         hasLiked,
+        hasBookmarked,
         username: matchingObject?.username,
         fullName: matchingObject?.fullName,
         photoURL: matchingObject?.photoURL,
@@ -419,6 +438,46 @@ export default function Profile() {
       }
     },
     [dispatch, processingLikePosts, currentUserUID]
+  );
+  const handleBookmarkClick = useCallback(
+    async (id: string) => {
+      // If checking wouldn't exist then after non-stop like clicking the like count gets incorrect
+      if (processingBookmarkPosts.includes(id)) {
+        dispatch(setErrorMessage("Wait before bookmarking again!"));
+        dispatch(setIsSnackbarOpen(true));
+        return;
+      }
+      try {
+        setProcessingBookmarkPosts((currentPosts) => [...currentPosts, id]);
+
+        const docRef = doc(db, "users", userUID);
+        const querySnapshot = await getDoc(docRef);
+        const bookmarks = querySnapshot.data()?.bookmarks;
+
+        if (bookmarks.includes(id)) {
+          await updateDoc(docRef, {
+            bookmarks: arrayRemove(id),
+          });
+        } else {
+          await updateDoc(docRef, {
+            bookmarks: arrayUnion(id),
+          });
+        }
+
+        setProcessingBookmarkPosts((currentPosts) =>
+          currentPosts.filter((post) => post !== id)
+        );
+        dispatch(changePostInfoAfterBookmarking(id));
+      } catch {
+        dispatch(
+          setErrorMessage(
+            "Error occurred while bookmarking post. Try again later!"
+          )
+        );
+        dispatch(setIsSnackbarOpen(true));
+      }
+    },
+    [dispatch, processingBookmarkPosts, userUID]
   );
 
   return (
@@ -733,6 +792,7 @@ export default function Profile() {
                     {...post}
                     key={post.postId}
                     handleLikeClick={handleLikeClick}
+                    handleBookmarkClick={handleBookmarkClick}
                   />
                 ))}
               </Grid>
