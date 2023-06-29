@@ -31,6 +31,14 @@ export const postsSlice = createSlice({
         return post;
       });
     },
+    changePostInfoAfterBookmarking: (state, action: PayloadAction<string>) => {
+      state.posts = state.posts.map((post) => {
+        if (post.postId === action.payload) {
+          return { ...post, hasBookmarked: !post.hasBookmarked };
+        }
+        return post;
+      });
+    },
     changePostInfoAfterCommenting: (state, action: PayloadAction<string>) => {
       state.posts = state.posts.map((post) => {
         if (post.postId === action.payload) {
@@ -49,6 +57,7 @@ export const {
   setPosts,
   clearAllPosts,
   changePostInfoAfterLiking,
+  changePostInfoAfterBookmarking,
   changePostInfoAfterCommenting,
   addNewPost,
   addPosts,
