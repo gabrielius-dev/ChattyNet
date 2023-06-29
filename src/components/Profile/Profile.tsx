@@ -55,6 +55,7 @@ import {
   clearAllPosts,
   setPosts,
 } from "../../app/features/postsSlice";
+import { setUser } from "../../app/features/userSlice";
 
 export default function Profile() {
   const [stateHasBeenReset, setStateHasBeenReset] = useState(false);
@@ -303,7 +304,7 @@ export default function Profile() {
       setIsFetching(true);
       setProcessingBookmarkPosts([]);
     }
-
+    dispatch(clearAllPosts());
     resetProfileState();
     setStateHasBeenReset(true);
   }, [dispatch, username]);
@@ -342,7 +343,6 @@ export default function Profile() {
 
   // if userDetails changes (edit Profile)
   useEffect(() => {
-    dispatch(clearAllPosts());
     if (!stateHasBeenReset) return;
     async function reloadPosts() {
       if (!userDetails.uid) return;
@@ -511,10 +511,18 @@ export default function Profile() {
           await updateDoc(docRef, {
             bookmarks: arrayRemove(id),
           });
+          dispatch(
+            setUser({
+              bookmarks: bookmarks.filter(
+                (bookmark: string) => bookmark !== id
+              ),
+            })
+          );
         } else {
           await updateDoc(docRef, {
             bookmarks: arrayUnion(id),
           });
+          dispatch(setUser({ bookmarks: [...bookmarks, id] }));
         }
 
         setProcessingBookmarkPosts((currentPosts) =>
@@ -543,6 +551,7 @@ export default function Profile() {
         boxSizing: "content-box",
         pb: 3,
         marginBottom: !isLoggedIn ? "70px" : 0,
+        position: "relative",
       }}
     >
       {!loading ? (

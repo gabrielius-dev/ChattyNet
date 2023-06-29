@@ -35,6 +35,7 @@ import {
 import { PostData, PostInterface } from "../../app/types/postType";
 import { getUsersInfo } from "../../app/helperFunctions";
 import CircularProgressComponent from "../CircularProgress";
+import { setUser } from "../../app/features/userSlice";
 
 export default function Posts() {
   const dispatch = useAppDispatch();
@@ -275,10 +276,18 @@ export default function Posts() {
           await updateDoc(docRef, {
             bookmarks: arrayRemove(id),
           });
+          dispatch(
+            setUser({
+              bookmarks: bookmarks.filter(
+                (bookmark: string) => bookmark !== id
+              ),
+            })
+          );
         } else {
           await updateDoc(docRef, {
             bookmarks: arrayUnion(id),
           });
+          dispatch(setUser({ bookmarks: [...bookmarks, id] }));
         }
 
         setProcessingBookmarkPosts((currentPosts) =>
