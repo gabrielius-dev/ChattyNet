@@ -45,6 +45,8 @@ import Comment from "./Comment";
 import { changePostInfoAfterCommenting } from "../../app/features/postsSlice";
 import ProfileSummary from "./ProfileSummary";
 import { Link } from "react-router-dom";
+import BookmarkBorderRoundedIcon from "@mui/icons-material/BookmarkBorderRounded";
+import BookmarkRoundedIcon from "@mui/icons-material/BookmarkRounded";
 
 const Post = memo(
   ({
@@ -57,7 +59,9 @@ const Post = memo(
     postId,
     commentsCount,
     handleLikeClick,
+    handleBookmarkClick,
     hasLiked,
+    hasBookmarked,
     information,
     followers,
     following,
@@ -486,6 +490,26 @@ const Post = memo(
                 {formatNumber(likes)}
               </Button>
             </Grid>
+            {isLoggedIn && (
+              <Grid item>
+                <Button
+                  onClick={() => handleBookmarkClick(postId)}
+                  sx={{
+                    color: hasBookmarked ? LIGHT_BLUE_COLOR : "#808080",
+                    "&:hover": {
+                      backgroundColor: "inherit",
+                      color: LIGHT_BLUE_COLOR,
+                    },
+                  }}
+                >
+                  {hasBookmarked ? (
+                    <BookmarkRoundedIcon />
+                  ) : (
+                    <BookmarkBorderRoundedIcon />
+                  )}
+                </Button>
+              </Grid>
+            )}
           </Grid>
         </Grid>
         {showCommentSection && (
