@@ -57,6 +57,7 @@ import {
 } from "../../app/features/postsSlice";
 
 export default function Profile() {
+  const [stateHasBeenReset, setStateHasBeenReset] = useState(false);
   const { username } = useParams();
   const [accountExists, setAccountExists] = useState(false);
   const [userUID, setUserUID] = useState("");
@@ -86,92 +87,101 @@ export default function Profile() {
     string[]
   >([]);
 
-  const getInitialPosts = useCallback(async () => {
-    let q1, queryType, queryID;
-    // User uid
-    if (currentElementSelected === "Tweets") {
-      queryType = "Tweets";
-      queryID = userDetails.uid;
-    } else if (currentElementSelected === "Likes") {
-      queryType = "Likes";
-      queryID = userDetails.likedPosts;
-    }
-    if (queryType === "Tweets")
-      q1 = query(
-        collection(db, "posts"),
-        orderBy("date", "desc"),
-        where("createdBy", "==", queryID),
-        limit(20)
-      );
-    // User liked posts array
-    if (queryType === "Likes")
-      q1 = query(
-        collection(db, "posts"),
-        where(documentId(), "in", queryID),
-        limit(20)
-      );
-    if (!q1) return;
-    const querySnapshot1 = await getDocs(q1);
-    if (querySnapshot1.empty) return;
-    setMorePostsExist(querySnapshot1.docs.length === 20);
+  const getInitialPosts = useCallback(
+    async (queryType: "Tweets" | "Likes") => {
+      let q1, queryID;
+      // User uid
 
-    setLastVisiblePost(querySnapshot1.docs[querySnapshot1.docs.length - 1]);
-    const usersUID = [
-      ...new Set(querySnapshot1.docs.map((doc) => doc.data().createdBy)),
-    ];
-    const usersInfo = await getUsersInfo(usersUID);
-
-    const postsWithoutUserInfo: PostInterface[] = querySnapshot1.docs.map(
-      (doc) =>
-        ({
-          ...doc.data(),
-          postId: doc.id,
-          date: doc.data().date.toDate().toDateString(),
-        } as PostInterface)
-    );
-
-    let likedPosts: string[];
-    let bookmarks: string[];
-
-    if (isLoggedIn) {
-      const docRef = doc(db, "users", userUID);
-      const querySnapshot = await getDoc(docRef);
-      likedPosts = querySnapshot.data()?.likedPosts;
-      bookmarks = querySnapshot.data()?.bookmarks;
-    }
-    const postsWithUserInfo: PostData[] = postsWithoutUserInfo.map((post) => {
-      const matchingObject = usersInfo.find(
-        (item) => item.id === post.createdBy
-      );
-      let hasLiked = null;
-      let hasBookmarked = false;
-      if (isLoggedIn) {
-        if (likedPosts.includes(post.postId)) hasLiked = true;
-        else if (!likedPosts.includes(post.postId)) hasLiked = false;
-        if (bookmarks.includes(post.postId)) hasBookmarked = true;
-        else if (!bookmarks.includes(post.postId)) hasBookmarked = false;
+      if (queryType === "Tweets") {
+        queryID = userDetails.uid;
+      } else if (queryType === "Likes") {
+        queryID = userDetails.likedPosts;
+        if (userDetails.likedPosts.length === 0) {
+          dispatch(clearAllPosts());
+          return;
+        }
       }
+      if (queryType === "Tweets")
+        q1 = query(
+          collection(db, "posts"),
+          orderBy("date", "desc"),
+          where("createdBy", "==", queryID),
+          limit(20)
+        );
+      // User liked posts array
+      if (queryType === "Likes")
+        q1 = query(
+          collection(db, "posts"),
+          where(documentId(), "in", queryID),
+          limit(20)
+        );
+      if (!q1) return;
+      const querySnapshot1 = await getDocs(q1);
+      if (querySnapshot1.empty) {
+        dispatch(clearAllPosts());
+        return;
+      }
+      setMorePostsExist(querySnapshot1.docs.length === 20);
 
-      return {
-        ...post,
-        hasLiked,
-        hasBookmarked,
-        username: matchingObject?.username,
-        fullName: matchingObject?.fullName,
-        photoURL: matchingObject?.photoURL,
-        information: matchingObject?.information,
-        followers: matchingObject?.followersCount,
-        following: matchingObject?.followingCount,
-      } as PostData;
-    });
-    return postsWithUserInfo;
-  }, [
-    currentElementSelected,
-    currentUserUID,
-    isLoggedIn,
-    userDetails.likedPosts,
-    userDetails.uid,
-  ]);
+      setLastVisiblePost(querySnapshot1.docs[querySnapshot1.docs.length - 1]);
+      const usersUID = [
+        ...new Set(querySnapshot1.docs.map((doc) => doc.data().createdBy)),
+      ];
+      const usersInfo = await getUsersInfo(usersUID);
+
+      const postsWithoutUserInfo: PostInterface[] = querySnapshot1.docs.map(
+        (doc) =>
+          ({
+            ...doc.data(),
+            postId: doc.id,
+            date: doc.data().date.toDate().toDateString(),
+          } as PostInterface)
+      );
+
+      let likedPosts: string[];
+      let bookmarks: string[];
+
+      if (isLoggedIn) {
+        const docRef = doc(db, "users", currentUserUID);
+        const querySnapshot = await getDoc(docRef);
+        likedPosts = querySnapshot.data()?.likedPosts;
+        bookmarks = querySnapshot.data()?.bookmarks;
+      }
+      const postsWithUserInfo: PostData[] = postsWithoutUserInfo.map((post) => {
+        const matchingObject = usersInfo.find(
+          (item) => item.id === post.createdBy
+        );
+        let hasLiked = null;
+        let hasBookmarked = false;
+        if (isLoggedIn) {
+          if (likedPosts.includes(post.postId)) hasLiked = true;
+          else if (!likedPosts.includes(post.postId)) hasLiked = false;
+          if (bookmarks.includes(post.postId)) hasBookmarked = true;
+          else if (!bookmarks.includes(post.postId)) hasBookmarked = false;
+        }
+
+        return {
+          ...post,
+          hasLiked,
+          hasBookmarked,
+          username: matchingObject?.username,
+          fullName: matchingObject?.fullName,
+          photoURL: matchingObject?.photoURL,
+          information: matchingObject?.information,
+          followers: matchingObject?.followersCount,
+          following: matchingObject?.followingCount,
+        } as PostData;
+      });
+      return postsWithUserInfo;
+    },
+    [
+      currentUserUID,
+      dispatch,
+      isLoggedIn,
+      userDetails.likedPosts,
+      userDetails.uid,
+    ]
+  );
 
   const loadMorePosts = async () => {
     if (!morePostsExist) return;
@@ -226,7 +236,7 @@ export default function Profile() {
     let bookmarks: string[];
 
     if (isLoggedIn) {
-      const docRef = doc(db, "users", userUID);
+      const docRef = doc(db, "users", currentUserUID);
       const querySnapshot = await getDoc(docRef);
       likedPosts = querySnapshot.data()?.likedPosts;
       bookmarks = querySnapshot.data()?.bookmarks;
@@ -262,6 +272,43 @@ export default function Profile() {
   };
 
   useEffect(() => {
+    function resetProfileState() {
+      setStateHasBeenReset(false);
+      setAccountExists(false);
+      setUserUID("");
+      dispatch(
+        setUserProfileDetails({
+          uid: "",
+          username: "",
+          fullName: "",
+          photoURL: null,
+          headerPhotoURL: null,
+          information: "",
+          followersCount: 0,
+          followingCount: 0,
+          following: [],
+          followers: [],
+          creationDate: null,
+          tweetsCount: 0,
+          likedPosts: [],
+        })
+      );
+      setLoading(true);
+      setHoveredFollowers(false);
+      setHoveredFollowing(false);
+      setIsFollowing(false);
+      setLastVisiblePost(null);
+      setMorePostsExist(false);
+      setProcessingLikePosts([]);
+      setIsFetching(true);
+      setProcessingBookmarkPosts([]);
+    }
+
+    resetProfileState();
+    setStateHasBeenReset(true);
+  }, [dispatch, username]);
+
+  useEffect(() => {
     async function getUsernameExists() {
       if (!username) return;
       const docRef = doc(db, "usernames", username);
@@ -295,16 +342,22 @@ export default function Profile() {
 
   // if userDetails changes (edit Profile)
   useEffect(() => {
+    dispatch(clearAllPosts());
+    if (!stateHasBeenReset) return;
     async function reloadPosts() {
       if (!userDetails.uid) return;
-      const returnedPosts = (await getInitialPosts()) || [];
+      const returnedPosts =
+        (await getInitialPosts(currentElementSelected)) || [];
       dispatch(setPosts(returnedPosts));
     }
     reloadPosts();
-    return () => {
-      dispatch(clearAllPosts());
-    };
-  }, [currentElementSelected, dispatch, getInitialPosts, userDetails]);
+  }, [
+    currentElementSelected,
+    dispatch,
+    getInitialPosts,
+    stateHasBeenReset,
+    userDetails,
+  ]);
 
   async function handleFollow() {
     if (!userDetails) return;
@@ -350,7 +403,7 @@ export default function Profile() {
   async function handleTweetsClick() {
     setIsFetching(true);
     setCurrentElementSelected("Tweets");
-    const returnedPosts = (await getInitialPosts()) || [];
+    const returnedPosts = (await getInitialPosts("Tweets")) || [];
     dispatch(setPosts(returnedPosts));
     setIsFetching(false);
   }
@@ -358,7 +411,7 @@ export default function Profile() {
   async function handleLikesClick() {
     setIsFetching(true);
     setCurrentElementSelected("Likes");
-    const returnedPosts = (await getInitialPosts()) || [];
+    const returnedPosts = (await getInitialPosts("Likes")) || [];
     dispatch(setPosts(returnedPosts));
     setIsFetching(false);
   }
@@ -373,13 +426,13 @@ export default function Profile() {
         currentElementSelected === "Likes" &&
         posts.length !== userDetails.likedPosts.length
       ) {
-        const returnedPosts = (await getInitialPosts()) || [];
+        const returnedPosts = (await getInitialPosts("Likes")) || [];
         dispatch(setPosts(returnedPosts));
       } else if (
         currentElementSelected === "Tweets" &&
         posts.length === userDetails.likedPosts.length
       ) {
-        const returnedPosts = (await getInitialPosts()) || [];
+        const returnedPosts = (await getInitialPosts("Tweets")) || [];
         dispatch(setPosts(returnedPosts));
       }
     }
@@ -538,7 +591,10 @@ export default function Profile() {
             )}
           </Grid>
           <Grid item container sx={{ pr: 2, pl: 2 }}>
-            <Grid item sx={{ marginTop: "-80px" }}>
+            <Grid
+              item
+              sx={{ marginTop: "-80px", width: "150px", height: "150px" }}
+            >
               {userDetails?.photoURL ? (
                 <img
                   src={userDetails.photoURL}
@@ -786,7 +842,7 @@ export default function Profile() {
                   Likes
                 </Grid>
               </Grid>
-              <Grid item container>
+              <Grid item container justifyContent="center">
                 {posts.map((post) => (
                   <Post
                     {...post}
@@ -795,6 +851,21 @@ export default function Profile() {
                     handleBookmarkClick={handleBookmarkClick}
                   />
                 ))}
+                {posts.length === 0 && userDetails.fullName && (
+                  <Grid item>
+                    <Typography
+                      sx={{
+                        fontWeight: "bold",
+                        mb: 1,
+                        fontSize: "31px",
+                      }}
+                    >
+                      {currentElementSelected === "Tweets"
+                        ? `${userDetails.fullName} doesn't have any tweets.`
+                        : `${userDetails.fullName} haven't liked any posts.`}
+                    </Typography>
+                  </Grid>
+                )}
               </Grid>
               {morePostsExist && (
                 <Grid item xs>
