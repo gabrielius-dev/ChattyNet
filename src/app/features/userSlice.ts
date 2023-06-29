@@ -12,6 +12,7 @@ interface userState {
   information: string;
   followersCount: number;
   followingCount: number;
+  bookmarks: string[];
 }
 
 const initialState: userState = {
@@ -26,6 +27,7 @@ const initialState: userState = {
   information: "",
   followersCount: 0,
   followingCount: 0,
+  bookmarks: [],
 };
 
 export const userSlice = createSlice({

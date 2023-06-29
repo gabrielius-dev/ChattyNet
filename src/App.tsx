@@ -72,6 +72,7 @@ function App() {
         const information = documentSnapshot.get("information");
         const followersCount = documentSnapshot.get("followers").length;
         const followingCount = documentSnapshot.get("following").length;
+        const bookmarks = documentSnapshot.get("bookmarks");
         dispatch(
           setUser({
             fullName,
@@ -83,6 +84,7 @@ function App() {
             information,
             followersCount,
             followingCount,
+            bookmarks,
           })
         );
         if (isSignUpSetupFinished) {
