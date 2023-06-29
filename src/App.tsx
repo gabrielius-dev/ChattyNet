@@ -112,7 +112,10 @@ function App() {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
-          <Route path="/:username" element={<Profile />} />
+          <Route
+            path="/:username"
+            element={<Profile key={window.location.pathname} />}
+          />
           <Route path="/:username/followers" element={<Followers />} />
           <Route path="/:username/following" element={<Following />} />
         </Routes>
