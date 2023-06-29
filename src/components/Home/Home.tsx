@@ -11,6 +11,7 @@ export default function Home() {
         width: "52vw",
         maxWidth: "1000px",
         boxSizing: "content-box",
+        position: "relative",
       }}
     >
       <StatusUpdate />
