@@ -53,6 +53,7 @@ const GoogleLogInButton = () => {
             followers: [],
             following: [],
             creationDate: Timestamp.now(),
+            bookmarks: [],
           }),
           setDoc(docRef, { email }),
         ]);

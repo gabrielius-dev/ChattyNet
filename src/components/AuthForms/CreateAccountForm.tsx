@@ -89,6 +89,7 @@ export default function CreateAccountForm() {
           followers: [],
           following: [],
           creationDate: Timestamp.now(),
+          bookmarks: [],
         }),
       ]);
       dispatch(hideSignUpForm());
