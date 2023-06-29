@@ -17,12 +17,14 @@ export interface PostData {
   postId: string;
   commentsCount: number;
   hasLiked: boolean | null;
+  hasBookmarked: boolean;
   information: string;
   following: number;
   followers: number;
 }
 
 type handleLikeClickType = (id: string) => void;
+type handleBookmarkClickType = (id: string) => void;
 
 export interface PostComponentArguments {
   photoURL: string | null;
@@ -34,7 +36,9 @@ export interface PostComponentArguments {
   postId: string;
   commentsCount: number;
   handleLikeClick: handleLikeClickType;
+  handleBookmarkClick: handleBookmarkClickType;
   hasLiked: boolean | null;
+  hasBookmarked: boolean;
   information: string;
   following: number;
   followers: number;
