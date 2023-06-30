@@ -17,6 +17,7 @@ import { doc, getDoc } from "firebase/firestore";
 import RemainingSignUpSetup from "./components/AuthForms/RemainingSignUpSetup";
 import Followers from "./components/Profile/Followers";
 import Following from "./components/Profile/Following";
+import NotFound from "./components/NotFound";
 
 const Home = lazy(() => import("./components/Home/Home"));
 const Notifications = lazy(
@@ -120,6 +121,7 @@ function App() {
           />
           <Route path="/:username/followers" element={<Followers />} />
           <Route path="/:username/following" element={<Following />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         {isLogInFormShowing && <LogInForm />}
         {isSignUpFormShowing && <SignUpForm />}
