@@ -870,8 +870,8 @@ export default function Profile() {
                       }}
                     >
                       {currentElementSelected === "Tweets"
-                        ? `${userDetails.fullName} doesn't have any tweets.`
-                        : `${userDetails.fullName} haven't liked any posts.`}
+                        ? `${userDetails.fullName} doesn't have any tweets`
+                        : `${userDetails.fullName} haven't liked any posts`}
                     </Typography>
                   </Grid>
                 )}
