@@ -80,8 +80,18 @@ export default function Sidebar() {
     }
   }, [isLoggedIn, photoURL, fullName]);
 
-  const getColor = (label: string) =>
-    currentLocation === label.toLowerCase() ? LIGHT_BLUE_COLOR : "black";
+  const getColor = (label: string) => {
+    // if currentLocation is user's profile
+    if (
+      !["home", "notifications", "messages", "bookmarks"].includes(
+        currentLocation
+      ) &&
+      label.toLowerCase() === "profile"
+    )
+      return LIGHT_BLUE_COLOR;
+
+    return currentLocation === label.toLowerCase() ? LIGHT_BLUE_COLOR : "black";
+  };
 
   const signOutUser = () => {
     signOut(auth)
