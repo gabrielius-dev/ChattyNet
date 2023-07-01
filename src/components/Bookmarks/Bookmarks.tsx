@@ -344,7 +344,7 @@ export default function Bookmarks() {
         position: "relative",
       }}
     >
-      {!loading && (
+      {!loading ? (
         <Grid container>
           <Grid
             item
@@ -411,8 +411,7 @@ export default function Bookmarks() {
             </Grid>
           )}
         </Grid>
-      )}
-      {loading && <CircularProgressComponent />}
+      ):<CircularProgressComponent/>}
     </Box>
   );
 }

@@ -10,6 +10,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { LIGHT_GRAY_COLOR } from "../../styles/colors";
 import UserInformation from "./UserInformation";
 import { SmallUserInformationInterface } from "../../app/types/userType";
+import CircularProgressComponent from "../CircularProgress";
 
 export default function Following() {
   const { username } = useParams();
@@ -105,7 +106,7 @@ export default function Following() {
         boxSizing: "content-box",
       }}
     >
-      {!loading && (
+      {!loading ? (
         <Grid container>
           <Grid
             item
@@ -193,7 +194,7 @@ export default function Following() {
               </Grid>
             )}
         </Grid>
-      )}
+      ):<CircularProgressComponent/>}
     </Box>
   );
 }
