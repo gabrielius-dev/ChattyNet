@@ -13,6 +13,7 @@ export const getUsersInfo = async (usersUID: string[]) => {
   const querySnapshot = await getDocs(q);
   const usersInfo = querySnapshot.docs.map((doc) => ({
     id: doc.id,
+    createdBy: doc.data().uid,
     username: doc.data().username,
     fullName: doc.data().fullName,
     photoURL: doc.data().photoURL || null,
@@ -49,4 +50,23 @@ export function formatNumber(number: number) {
     notation: "compact",
     compactDisplay: "short",
   }).format(number);
+}
+interface NotificationInterface {
+  type: string;
+  forUser: string;
+  byUser: string;
+  elementId: string | null;
+}
+export async function doesNotificationAlreadyExist(
+  notification: NotificationInterface
+) {
+  const q = query(
+    collection(db, "notifications"),
+    where("type", "==", notification.type),
+    where("forUser", "==", notification.forUser),
+    where("byUser", "==", notification.byUser),
+    where("elementId", "==", notification.elementId)
+  );
+  const querySnapshot = await getDocs(q);
+  return !querySnapshot.empty;
 }
