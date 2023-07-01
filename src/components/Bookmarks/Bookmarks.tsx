@@ -29,6 +29,7 @@ import {
   DocumentData,
   QueryDocumentSnapshot,
   startAfter,
+  addDoc,
 } from "firebase/firestore";
 import { db } from "../../app/firebase/firebase";
 import {
@@ -39,7 +40,10 @@ import {
   setPosts,
 } from "../../app/features/postsSlice";
 import { PostData, PostInterface } from "../../app/types/postType";
-import { getUsersInfo } from "../../app/helperFunctions";
+import {
+  doesNotificationAlreadyExist,
+  getUsersInfo,
+} from "../../app/helperFunctions";
 import { setUser } from "../../app/features/userSlice";
 import CircularProgressComponent from "../CircularProgress";
 
@@ -239,6 +243,30 @@ export default function Bookmarks() {
           batch.update(doc(db, "posts", id), {
             likes: increment(1),
           });
+          // Add notification for user that his post was liked
+          // if post creator is current user then don't show a notification
+          const querySnapshot = await getDoc(doc(db, "posts", id));
+          const postCreatorUID = querySnapshot.data()?.createdBy;
+
+          if (!postCreatorUID) return;
+
+          if (postCreatorUID !== userUID) {
+            const notification = {
+              type: "post/like",
+              forUser: postCreatorUID,
+              byUser: userUID,
+              elementId: id,
+            };
+            // if notification already exist
+            // maybe user removed like and pressed it again and user haven't checked the notification
+            // to not duplicate
+            const notificationAlreadyExist = await doesNotificationAlreadyExist(
+              notification
+            );
+            if (!notificationAlreadyExist) {
+              await addDoc(collection(db, "notifications"), notification);
+            }
+          }
         }
 
         setProcessingLikePosts((currentPosts) =>

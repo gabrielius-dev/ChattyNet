@@ -16,6 +16,7 @@ import {
   increment,
   documentId,
   updateDoc,
+  addDoc,
 } from "firebase/firestore";
 import { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -31,6 +32,7 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
+  doesNotificationAlreadyExist,
   formatNumber,
   getUserInfo,
   getUsersInfo,
@@ -385,6 +387,26 @@ export default function Profile() {
       batch.update(doc(db, "users", currentUserUID), {
         following: arrayUnion(userDetails.uid),
       });
+      // Add notification for user that his post was commented
+      // if post creator is current user then don't show a notification
+      if (userDetails.uid !== currentUserUID) {
+        const notification = {
+          type: "profile/follow",
+          forUser: userDetails.uid,
+          byUser: currentUserUID,
+          elementId: null,
+        };
+        // if notification already exist
+        // maybe user removed like and pressed it again and user haven't checked the notification
+        // to not duplicate
+        const notificationAlreadyExist = await doesNotificationAlreadyExist(
+          notification
+        );
+        if (!notificationAlreadyExist) {
+          await addDoc(collection(db, "notifications"), notification);
+        }
+      }
+
       dispatch(
         setUserProfileDetails({
           followersCount: userDetails.followersCount + 1,
@@ -476,6 +498,30 @@ export default function Profile() {
           batch.update(doc(db, "posts", id), {
             likes: increment(1),
           });
+          // Add notification for user that his post was liked
+          // if post creator is current user then don't show a notification
+          const querySnapshot = await getDoc(doc(db, "posts", id));
+          const postCreatorUID = querySnapshot.data()?.createdBy;
+
+          if (!postCreatorUID) return;
+
+          if (postCreatorUID !== currentUserUID) {
+            const notification = {
+              type: "post/like",
+              forUser: postCreatorUID,
+              byUser: currentUserUID,
+              elementId: id,
+            };
+            // if notification already exist
+            // maybe user removed like and pressed it again and user haven't checked the notification
+            // to not duplicate
+            const notificationAlreadyExist = await doesNotificationAlreadyExist(
+              notification
+            );
+            if (!notificationAlreadyExist) {
+              await addDoc(collection(db, "notifications"), notification);
+            }
+          }
         }
 
         setProcessingLikePosts((currentPosts) =>
@@ -490,7 +536,7 @@ export default function Profile() {
         dispatch(setIsSnackbarOpen(true));
       }
     },
-    [dispatch, processingLikePosts, currentUserUID]
+    [processingLikePosts, dispatch, currentUserUID]
   );
   const handleBookmarkClick = useCallback(
     async (id: string) => {

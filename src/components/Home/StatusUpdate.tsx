@@ -23,6 +23,7 @@ import { db } from "../../app/firebase/firebase";
 import { setErrorMessage, setIsSnackbarOpen } from "../../app/features/UISlice";
 import { addNewPost } from "../../app/features/postsSlice";
 import { PostData } from "../../app/types/postType";
+import { doesNotificationAlreadyExist } from "../../app/helperFunctions";
 
 const StatusUpdate = () => {
   const dispatch = useAppDispatch();
@@ -34,6 +35,7 @@ const StatusUpdate = () => {
   const information = useAppSelector((state) => state.user.information);
   const followers = useAppSelector((state) => state.user.followersCount);
   const following = useAppSelector((state) => state.user.followingCount);
+  const followersArray = useAppSelector((state) => state.user.followers);
   const [text, setText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -46,6 +48,8 @@ const StatusUpdate = () => {
       followers,
       following,
       date,
+      createdBy: userUid,
+      hasBookmarked: false,
       text,
       likes: 0,
       commentsCount: 0,
@@ -78,6 +82,24 @@ const StatusUpdate = () => {
         const date = snapshot.data().date.toDate().toDateString();
         const postId = docRef.id;
         addPost(date, postId);
+        // Add notification for user that follow me(currentUser) when I upload new post
+        followersArray.forEach(async (follower) => {
+          const notification = {
+            type: "post/creation",
+            forUser: follower,
+            byUser: userUid,
+            elementId: postId,
+          };
+          // if notification already exist
+          // maybe user removed like and pressed it again and user haven't checked the notification
+          // to not duplicate
+          const notificationAlreadyExist = await doesNotificationAlreadyExist(
+            notification
+          );
+          if (!notificationAlreadyExist) {
+            await addDoc(collection(db, "notifications"), notification);
+          }
+        });
       }
 
       setText("");

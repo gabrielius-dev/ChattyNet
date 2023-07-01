@@ -4,6 +4,7 @@ import { Stack } from "@mui/material";
 import {
   DocumentData,
   QueryDocumentSnapshot,
+  addDoc,
   arrayRemove,
   arrayUnion,
   collection,
@@ -33,7 +34,10 @@ import {
   changePostInfoAfterBookmarking,
 } from "../../app/features/postsSlice";
 import { PostData, PostInterface } from "../../app/types/postType";
-import { getUsersInfo } from "../../app/helperFunctions";
+import {
+  doesNotificationAlreadyExist,
+  getUsersInfo,
+} from "../../app/helperFunctions";
 import CircularProgressComponent from "../CircularProgress";
 import { setUser } from "../../app/features/userSlice";
 
@@ -108,6 +112,7 @@ export default function Posts() {
         hasLiked,
         hasBookmarked,
         username: matchingObject?.username,
+        createdBy: matchingObject?.createdBy,
         fullName: matchingObject?.fullName,
         photoURL: matchingObject?.photoURL,
         information: matchingObject?.information,
@@ -176,6 +181,7 @@ export default function Posts() {
         hasLiked,
         hasBookmarked,
         username: matchingObject?.username,
+        createdBy: matchingObject?.createdBy,
         fullName: matchingObject?.fullName,
         photoURL: matchingObject?.photoURL,
         information: matchingObject?.information,
@@ -211,7 +217,7 @@ export default function Posts() {
   }, [loadMorePosts, loadingMorePosts, morePostsExist]);
 
   const handleLikeClick = useCallback(
-    async (id: string) => {
+    async (id: string, postCreatorUID: string) => {
       // If checking wouldn't exist then after non-stop like clicking the like count gets incorrect
       if (processingLikePosts.includes(id)) {
         dispatch(setErrorMessage("Wait before liking again!"));
@@ -240,6 +246,25 @@ export default function Posts() {
           batch.update(doc(db, "posts", id), {
             likes: increment(1),
           });
+          // Add notification for user that his post was liked
+          // if post creator is current user then don't show a notification
+          if (postCreatorUID !== userUID) {
+            const notification = {
+              type: "post/like",
+              forUser: postCreatorUID,
+              byUser: userUID,
+              elementId: id,
+            };
+            // if notification already exist
+            // maybe user removed like and pressed it again and user haven't checked the notification
+            // to not duplicate
+            const notificationAlreadyExist = await doesNotificationAlreadyExist(
+              notification
+            );
+            if (!notificationAlreadyExist) {
+              await addDoc(collection(db, "notifications"), notification);
+            }
+          }
         }
 
         setProcessingLikePosts((currentPosts) =>

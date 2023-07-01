@@ -40,7 +40,11 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../../app/firebase/firebase";
-import { formatNumber, getUsersInfo } from "../../app/helperFunctions";
+import {
+  doesNotificationAlreadyExist,
+  formatNumber,
+  getUsersInfo,
+} from "../../app/helperFunctions";
 import Comment from "./Comment";
 import { changePostInfoAfterCommenting } from "../../app/features/postsSlice";
 import ProfileSummary from "./ProfileSummary";
@@ -51,6 +55,7 @@ import BookmarkRoundedIcon from "@mui/icons-material/BookmarkRounded";
 const Post = memo(
   ({
     photoURL,
+    createdBy,
     fullName,
     username,
     date,
@@ -68,10 +73,11 @@ const Post = memo(
   }: PostComponentArguments) => {
     const dispatch = useAppDispatch();
     const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
-    const userUID = useAppSelector((state) => state.user.uid);
+    const currentUserUID = useAppSelector((state) => state.user.uid);
     const [commentText, setCommentText] = useState("");
     const [showCommentSection, setShowCommentSection] = useState(false);
     const commentRef = useRef<HTMLInputElement>(null);
+
     const currentUserPhotoURL = useAppSelector((state) => state.user.photoURL);
     const currentUserUsername = useAppSelector((state) => state.user.username);
     const currentUserFullName = useAppSelector((state) => state.user.fullName);
@@ -142,12 +148,14 @@ const Post = memo(
           );
           let hasLikedComment = null;
           if (isLoggedIn)
-            if (comment.likedUsers.includes(userUID)) hasLikedComment = true;
+            if (comment.likedUsers.includes(currentUserUID))
+              hasLikedComment = true;
             else hasLikedComment = false;
           return {
             ...comment,
             hasLikedComment,
             username: matchingObject?.username,
+            createdBy: matchingObject?.createdBy,
             fullName: matchingObject?.fullName,
             photoURL: matchingObject?.photoURL,
             information: matchingObject?.information,
@@ -179,7 +187,7 @@ const Post = memo(
 
       try {
         const docRef = await addDoc(collection(db, "postsComments"), {
-          createdBy: userUID,
+          createdBy: currentUserUID,
           text: commentText,
           date: Timestamp.now(),
           likedUsers: [],
@@ -189,6 +197,25 @@ const Post = memo(
         await updateDoc(doc(db, "posts", postId), {
           commentsCount: increment(1),
         });
+        // Add notification for user that his post was commented
+        // if post creator is current user then don't show a notification
+        if (createdBy !== currentUserUID) {
+          const notification = {
+            type: "post/comment",
+            forUser: createdBy,
+            byUser: currentUserUID,
+            elementId: postId,
+          };
+          // if notification already exist
+          // maybe user removed like and pressed it again and user haven't checked the notification
+          // to not duplicate
+          const notificationAlreadyExist = await doesNotificationAlreadyExist(
+            notification
+          );
+          if (!notificationAlreadyExist) {
+            await addDoc(collection(db, "notifications"), notification);
+          }
+        }
         dispatch(changePostInfoAfterCommenting(postId));
 
         const snapshot = await getDoc(docRef);
@@ -202,6 +229,7 @@ const Post = memo(
               likes: 0,
               commentId,
               photoURL: currentUserPhotoURL,
+              createdBy: currentUserUID,
               username: currentUserUsername,
               fullName: currentUserFullName,
               information: currentUserInformation,
@@ -219,7 +247,10 @@ const Post = memo(
       }
     }
 
-    async function handleCommentLikeClick(id: string) {
+    async function handleCommentLikeClick(
+      id: string,
+      commentCreatorUID: string
+    ) {
       // If checking wouldn't exist then after non-stop like clicking the like count gets incorrect
       if (processingLikeComments.includes(id)) {
         dispatch(setErrorMessage("Wait before liking again!"));
@@ -238,16 +269,35 @@ const Post = memo(
         setProcessingLikeComments((currentComments) =>
           currentComments.filter((comment) => comment !== id)
         );
-        if (likedUsers.includes(userUID)) {
+        if (likedUsers.includes(currentUserUID)) {
           updateDoc(docRef, {
-            likedUsers: arrayRemove(userUID),
+            likedUsers: arrayRemove(currentUserUID),
             likes: increment(-1),
           });
         } else {
           updateDoc(docRef, {
-            likedUsers: arrayUnion(userUID),
+            likedUsers: arrayUnion(currentUserUID),
             likes: increment(1),
           });
+          // Add notification for user that his comment was liked
+          // if post creator is current user then don't show a notification
+          if (commentCreatorUID !== currentUserUID) {
+            const notification = {
+              type: "comment/like",
+              forUser: commentCreatorUID,
+              byUser: currentUserUID,
+              elementId: id,
+            };
+            // if notification already exist
+            // maybe user removed like and pressed it again and user haven't checked the notification
+            // to not duplicate
+            const notificationAlreadyExist = await doesNotificationAlreadyExist(
+              notification
+            );
+            if (!notificationAlreadyExist) {
+              await addDoc(collection(db, "notifications"), notification);
+            }
+          }
         }
 
         setComments(
@@ -316,12 +366,14 @@ const Post = memo(
           );
           let hasLikedComment = null;
           if (isLoggedIn)
-            if (comment.likedUsers.includes(userUID)) hasLikedComment = true;
+            if (comment.likedUsers.includes(currentUserUID))
+              hasLikedComment = true;
             else hasLikedComment = false;
           return {
             ...comment,
             hasLikedComment,
             username: matchingObject?.username,
+            createdBy: matchingObject?.createdBy,
             fullName: matchingObject?.fullName,
             photoURL: matchingObject?.photoURL,
             information: matchingObject?.information,
@@ -473,7 +525,7 @@ const Post = memo(
               <Button
                 onClick={
                   hasLiked !== null
-                    ? () => handleLikeClick(postId)
+                    ? () => handleLikeClick(postId, createdBy)
                     : displayError
                 }
                 sx={{

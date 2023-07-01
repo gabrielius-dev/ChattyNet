@@ -14,6 +14,7 @@ export default function Comment({
   photoURL,
   fullName,
   username,
+  createdBy,
   date,
   text,
   likes,
@@ -150,7 +151,7 @@ export default function Comment({
             <Button
               onClick={
                 hasLikedComment !== null
-                  ? () => handleLikeClick(commentId)
+                  ? () => handleLikeClick(commentId, createdBy)
                   : displayError
               }
               sx={{
