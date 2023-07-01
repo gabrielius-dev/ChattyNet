@@ -72,6 +72,7 @@ function App() {
         const fullName = documentSnapshot.get("fullName");
         const information = documentSnapshot.get("information");
         const followersCount = documentSnapshot.get("followers").length;
+        const followers = documentSnapshot.get("followers");
         const followingCount = documentSnapshot.get("following").length;
         const bookmarks = documentSnapshot.get("bookmarks");
         dispatch(
@@ -83,6 +84,7 @@ function App() {
             isSignUpSetupFinished,
             photoURL,
             information,
+            followers,
             followersCount,
             followingCount,
             bookmarks,
