@@ -10,6 +10,7 @@ interface userState {
   isAuthenticating: boolean;
   photoURL: string;
   information: string;
+  followers: string[];
   followersCount: number;
   followingCount: number;
   bookmarks: string[];
@@ -25,6 +26,7 @@ const initialState: userState = {
   isAuthenticating: false,
   photoURL: "",
   information: "",
+  followers: [],
   followersCount: 0,
   followingCount: 0,
   bookmarks: [],
