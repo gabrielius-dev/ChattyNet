@@ -8,6 +8,7 @@ export interface PostInterface {
 }
 
 export interface PostData {
+  createdBy: string;
   username: string;
   fullName: string;
   photoURL: string | null;
@@ -23,10 +24,11 @@ export interface PostData {
   followers: number;
 }
 
-type handleLikeClickType = (id: string) => void;
+type handleLikeClickType = (id: string, postCreatorUID: string) => void;
 type handleBookmarkClickType = (id: string) => void;
 
 export interface PostComponentArguments {
+  createdBy: string;
   photoURL: string | null;
   fullName: string;
   username: string;
@@ -54,6 +56,7 @@ export interface CommentInterface {
 }
 
 export interface CommentData {
+  createdBy: string;
   username: string;
   fullName: string;
   photoURL: string | null;
@@ -68,6 +71,7 @@ export interface CommentData {
 }
 
 export interface CommentComponentArguments {
+  createdBy: string;
   photoURL: string | null;
   fullName: string;
   username: string;
