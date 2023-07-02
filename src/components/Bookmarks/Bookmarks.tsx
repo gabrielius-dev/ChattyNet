@@ -372,16 +372,15 @@ export default function Bookmarks() {
             </Grid>
           </Grid>
           {posts.length === 0 ? (
-            <Grid
-              item
-              container
-              sx={{
-                margin: 10,
-                alignItems: "center",
-              }}
-              direction="column"
-            >
-              <Typography sx={{ fontWeight: "bold", mb: 1, fontSize: "31px" }}>
+            <Grid item width="100%">
+              <Typography
+                sx={{
+                  fontWeight: "bold",
+                  mb: 1,
+                  fontSize: "31px",
+                  textAlign: "center",
+                }}
+              >
                 You don't have any bookmarked post.
               </Typography>
             </Grid>
