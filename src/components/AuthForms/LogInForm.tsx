@@ -57,7 +57,6 @@ const LoginForm = () => {
       dispatch(hideLogInForm());
     } catch (error: unknown) {
       const errorCode = (error as FirebaseError).code;
-      console.log(errorCode);
       const errorMessage = errorMessages[errorCode] || "Unknown error occurred";
       const isEmailError = errorMessage.toLowerCase().includes("email");
       const isPasswordError = errorMessage.toLowerCase().includes("password");
