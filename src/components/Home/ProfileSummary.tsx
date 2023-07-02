@@ -1,5 +1,5 @@
 import { Avatar, Grid, Paper, Typography } from "@mui/material";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { LIGHT_GRAY_COLOR } from "../../styles/colors";
 
@@ -21,12 +21,16 @@ export default function ProfileSummary({
   followers,
 }: ProfileSummaryArguments) {
   const [hovered, setHovered] = useState(false);
+  function handleClick(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) {
+    e.stopPropagation();
+  }
   return (
     <Paper elevation={1} sx={{ p: 1, borderRadius: "15px" }}>
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <Link
             to={`/${username}`}
+            onClick={handleClick}
             style={{ color: "inherit", textDecoration: "none" }}
           >
             <Avatar src={photoURL ?? undefined} sx={{ cursor: "pointer" }}>
@@ -45,6 +49,7 @@ export default function ProfileSummary({
                 cursor: "pointer",
               }}
               to={`/${username}`}
+              onClick={handleClick}
               onMouseOver={() => setHovered(true)}
               onMouseOut={() => setHovered(false)}
             >
@@ -59,6 +64,7 @@ export default function ProfileSummary({
                 cursor: "pointer",
                 color: LIGHT_GRAY_COLOR,
               }}
+              onClick={handleClick}
               to={`/${username}`}
             >
               @{username}
