@@ -411,7 +411,9 @@ export default function Bookmarks() {
             </Grid>
           )}
         </Grid>
-      ):<CircularProgressComponent/>}
+      ) : (
+        <CircularProgressComponent />
+      )}
     </Box>
   );
 }
