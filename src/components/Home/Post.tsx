@@ -205,6 +205,7 @@ const Post = memo(
             forUser: createdBy,
             byUser: currentUserUID,
             elementId: postId,
+            date: Timestamp.now(),
           };
           // if notification already exist
           // maybe user removed like and pressed it again and user haven't checked the notification
@@ -287,6 +288,7 @@ const Post = memo(
               forUser: commentCreatorUID,
               byUser: currentUserUID,
               elementId: id,
+              date: Timestamp.now(),
             };
             // if notification already exist
             // maybe user removed like and pressed it again and user haven't checked the notification

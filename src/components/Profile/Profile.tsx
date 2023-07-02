@@ -17,6 +17,7 @@ import {
   documentId,
   updateDoc,
   addDoc,
+  Timestamp,
 } from "firebase/firestore";
 import { useEffect, useState, useCallback } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -395,6 +396,7 @@ export default function Profile() {
           forUser: userDetails.uid,
           byUser: currentUserUID,
           elementId: null,
+          date: Timestamp.now(),
         };
         // if notification already exist
         // maybe user removed like and pressed it again and user haven't checked the notification
@@ -511,6 +513,7 @@ export default function Profile() {
               forUser: postCreatorUID,
               byUser: currentUserUID,
               elementId: id,
+              date: Timestamp.now(),
             };
             // if notification already exist
             // maybe user removed like and pressed it again and user haven't checked the notification

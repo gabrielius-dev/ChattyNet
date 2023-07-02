@@ -30,6 +30,7 @@ import {
   QueryDocumentSnapshot,
   startAfter,
   addDoc,
+  Timestamp,
 } from "firebase/firestore";
 import { db } from "../../app/firebase/firebase";
 import {
@@ -256,6 +257,7 @@ export default function Bookmarks() {
               forUser: postCreatorUID,
               byUser: userUID,
               elementId: id,
+              date: Timestamp.now(),
             };
             // if notification already exist
             // maybe user removed like and pressed it again and user haven't checked the notification

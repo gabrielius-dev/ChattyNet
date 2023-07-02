@@ -4,6 +4,7 @@ import { Stack } from "@mui/material";
 import {
   DocumentData,
   QueryDocumentSnapshot,
+  Timestamp,
   addDoc,
   arrayRemove,
   arrayUnion,
@@ -254,6 +255,7 @@ export default function Posts() {
               forUser: postCreatorUID,
               byUser: userUID,
               elementId: id,
+              date: Timestamp.now(),
             };
             // if notification already exist
             // maybe user removed like and pressed it again and user haven't checked the notification

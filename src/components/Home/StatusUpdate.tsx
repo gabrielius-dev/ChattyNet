@@ -11,6 +11,7 @@ import AutoAwesomeOutlined from "@mui/icons-material/AutoAwesomeOutlined";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useState, useRef } from "react";
 import {
+  Timestamp,
   addDoc,
   collection,
   doc,
@@ -89,6 +90,7 @@ const StatusUpdate = () => {
             forUser: follower,
             byUser: userUid,
             elementId: postId,
+            date: Timestamp.now(),
           };
           // if notification already exist
           // maybe user removed like and pressed it again and user haven't checked the notification
