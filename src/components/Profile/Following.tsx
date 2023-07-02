@@ -194,7 +194,9 @@ export default function Following() {
               </Grid>
             )}
         </Grid>
-      ):<CircularProgressComponent/>}
+      ) : (
+        <CircularProgressComponent />
+      )}
     </Box>
   );
 }

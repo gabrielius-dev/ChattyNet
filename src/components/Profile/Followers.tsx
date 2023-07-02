@@ -193,7 +193,9 @@ export default function Followers() {
               </Grid>
             )}
         </Grid>
-      ):<CircularProgressComponent/>}
+      ) : (
+        <CircularProgressComponent />
+      )}
     </Box>
   );
 }
