@@ -552,7 +552,7 @@ export default function Profile() {
       try {
         setProcessingBookmarkPosts((currentPosts) => [...currentPosts, id]);
 
-        const docRef = doc(db, "users", userUID);
+        const docRef = doc(db, "users", currentUserUID);
         const querySnapshot = await getDoc(docRef);
         const bookmarks = querySnapshot.data()?.bookmarks;
 
@@ -574,9 +574,6 @@ export default function Profile() {
           dispatch(setUser({ bookmarks: [...bookmarks, id] }));
         }
 
-        setProcessingBookmarkPosts((currentPosts) =>
-          currentPosts.filter((post) => post !== id)
-        );
         dispatch(changePostInfoAfterBookmarking(id));
       } catch {
         dispatch(
@@ -585,9 +582,13 @@ export default function Profile() {
           )
         );
         dispatch(setIsSnackbarOpen(true));
+      } finally {
+        setProcessingBookmarkPosts((currentPosts) =>
+          currentPosts.filter((post) => post !== id)
+        );
       }
     },
-    [dispatch, processingBookmarkPosts, userUID]
+    [currentUserUID, dispatch, processingBookmarkPosts]
   );
 
   return (
