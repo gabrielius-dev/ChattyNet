@@ -50,7 +50,6 @@ import Comment from "./Comment";
 import {
   changePostInfoAfterCommenting,
   removeOneCommentCount,
-  setPosts,
 } from "../../app/features/postsSlice";
 import ProfileSummary from "./ProfileSummary";
 import { Link } from "react-router-dom";
