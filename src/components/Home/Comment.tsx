@@ -1,14 +1,15 @@
-import { Avatar, Button, Grid, Typography } from "@mui/material";
+import { Avatar, Button, Grid, Typography, IconButton } from "@mui/material";
 import { LIGHT_BLUE_COLOR, LIGHT_GRAY_COLOR } from "../../styles/colors";
 import { CommentComponentArguments } from "../../app/types/postType";
-import { useAppDispatch } from "../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { setErrorMessage, setIsSnackbarOpen } from "../../app/features/UISlice";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded";
 import { formatNumber } from "../../app/helperFunctions";
-import { useState } from "react";
+import React, { useState } from "react";
 import ProfileSummary from "./ProfileSummary";
 import { Link } from "react-router-dom";
+import ClearIcon from "@mui/icons-material/Clear";
 
 export default function Comment({
   photoURL,
@@ -20,6 +21,7 @@ export default function Comment({
   likes,
   hasLikedComment,
   handleLikeClick,
+  handleDelete,
   commentId,
   information,
   followers,
@@ -33,6 +35,8 @@ export default function Comment({
   });
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
   const [hovered, setHovered] = useState(false);
+  const [showCloseButton, setShowCloseButton] = useState(false);
+  const currentUserUID = useAppSelector((state) => state.user.uid);
 
   function displayError() {
     dispatch(setErrorMessage("You must sign in to like."));
@@ -67,9 +71,11 @@ export default function Comment({
         padding: 0,
         "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.03)" },
       }}
+      onMouseOver={() => setShowCloseButton(createdBy === currentUserUID)}
       onMouseOut={() => {
         if (timer) clearTimeout(timer);
         setShowProfileSummary(false);
+        setShowCloseButton(false);
       }}
     >
       <Grid item>
@@ -145,6 +151,18 @@ export default function Comment({
               {text}
             </Typography>
           </Grid>
+          {showCloseButton && (
+            <Grid item marginLeft="auto">
+              <IconButton
+                sx={{ "&:hover": { color: LIGHT_BLUE_COLOR } }}
+                onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
+                  handleDelete(e, commentId)
+                }
+              >
+                <ClearIcon />
+              </IconButton>
+            </Grid>
+          )}
         </Grid>
         <Grid item container xs={12}>
           <Grid item>

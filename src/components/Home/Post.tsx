@@ -1,4 +1,4 @@
-import { memo, useState, useRef, useEffect } from "react";
+import React, { memo, useState, useRef, useEffect, useCallback } from "react";
 import {
   Avatar,
   Button,
@@ -28,6 +28,7 @@ import {
   arrayRemove,
   arrayUnion,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -46,7 +47,11 @@ import {
   getUsersInfo,
 } from "../../app/helperFunctions";
 import Comment from "./Comment";
-import { changePostInfoAfterCommenting } from "../../app/features/postsSlice";
+import {
+  changePostInfoAfterCommenting,
+  removeOneCommentCount,
+  setPosts,
+} from "../../app/features/postsSlice";
 import ProfileSummary from "./ProfileSummary";
 import { Link } from "react-router-dom";
 import BookmarkBorderRoundedIcon from "@mui/icons-material/BookmarkBorderRounded";
@@ -406,6 +411,34 @@ const Post = memo(
       setTimer(timer);
     }
 
+    const handleDeleteComment = useCallback(
+      async (
+        e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+        id: string
+      ) => {
+        e.stopPropagation();
+
+        try {
+          setComments((currentComments) =>
+            currentComments.filter((comment) => comment.commentId !== id)
+          );
+          dispatch(removeOneCommentCount(postId));
+          await deleteDoc(doc(db, "postsComments", id));
+          await updateDoc(doc(db, "posts", postId), {
+            commentsCount: increment(-1),
+          });
+        } catch {
+          dispatch(
+            setErrorMessage(
+              "Error occurred while deleting post. Try again later!"
+            )
+          );
+          dispatch(setIsSnackbarOpen(true));
+        }
+      },
+      [dispatch, postId]
+    );
+
     return (
       <Grid
         container
@@ -612,6 +645,7 @@ const Post = memo(
               <Comment
                 {...comment}
                 handleLikeClick={handleCommentLikeClick}
+                handleDelete={handleDeleteComment}
                 key={comment.commentId}
               />
             ))}
