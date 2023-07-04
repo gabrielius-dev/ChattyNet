@@ -14,11 +14,6 @@ import {
   showLoginReminder,
 } from "./app/features/UISlice";
 import { doc, getDoc } from "firebase/firestore";
-import RemainingSignUpSetup from "./components/AuthForms/RemainingSignUpSetup";
-import Followers from "./components/Profile/Followers";
-import Following from "./components/Profile/Following";
-import NotFound from "./components/NotFound";
-import PostPage from "./components/Home/PostPage";
 
 const Home = lazy(() => import("./components/Home/Home"));
 const Notifications = lazy(
@@ -29,6 +24,12 @@ const Profile = lazy(() => import("./components/Profile/Profile"));
 const LogInForm = lazy(() => import("./components/AuthForms/LogInForm"));
 const SignUpForm = lazy(() => import("./components/AuthForms/SignUpForm"));
 const LoginReminder = lazy(() => import("./components/LoginReminder"));
+const RemainingSignUpSetup = lazy(
+  () => import("./components/AuthForms/RemainingSignUpSetup")
+);
+const Followers = lazy(() => import("./components/Profile/Followers"));
+const Following = lazy(() => import("./components/Profile/Following"));
+const NotFound = lazy(() => import("./components/NotFound"));
 
 function App() {
   const dispatch = useAppDispatch();
@@ -132,8 +133,6 @@ function App() {
           />
           <Route path="/:username/followers" element={<Followers />} />
           <Route path="/:username/following" element={<Following />} />
-          <Route path="/:username/posts/:postID" element={<PostPage />} />
-
           <Route path="*" element={<NotFound />} />
         </Routes>
         {isLogInFormShowing && <LogInForm />}
