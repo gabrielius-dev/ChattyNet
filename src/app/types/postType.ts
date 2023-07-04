@@ -1,3 +1,5 @@
+import React from "react";
+
 export interface PostInterface {
   date: string;
   text: string;
@@ -25,6 +27,10 @@ export interface PostData {
 }
 
 type handleLikeClickType = (id: string, postCreatorUID: string) => void;
+type handleDeleteType = (
+  e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  id: string
+) => void;
 type handleBookmarkClickType = (id: string) => void;
 
 export interface PostComponentArguments {
@@ -79,6 +85,7 @@ export interface CommentComponentArguments {
   text: string;
   likes: number;
   handleLikeClick: handleLikeClickType;
+  handleDelete: handleDeleteType;
   hasLikedComment: boolean | null;
   commentId: string;
   information: string;
