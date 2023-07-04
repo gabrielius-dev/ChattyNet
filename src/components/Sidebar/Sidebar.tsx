@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import HomeOutlined from "@mui/icons-material/HomeOutlined";
 import NotificationsOutlined from "@mui/icons-material/NotificationsOutlined";
-import MailOutlined from "@mui/icons-material/MailOutlined";
 import BookmarksOutlined from "@mui/icons-material/BookmarksOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
@@ -51,10 +50,6 @@ export default function Sidebar() {
           icon: <NotificationsOutlined />,
         },
         {
-          label: "Messages",
-          icon: <MailOutlined />,
-        },
-        {
           label: "Bookmarks",
           icon: <BookmarksOutlined />,
         },
@@ -83,9 +78,7 @@ export default function Sidebar() {
   const getColor = (label: string) => {
     // if currentLocation is user's profile
     if (
-      !["home", "notifications", "messages", "bookmarks"].includes(
-        currentLocation
-      ) &&
+      !["home", "notifications", "bookmarks"].includes(currentLocation) &&
       label.toLowerCase() === "profile"
     )
       return LIGHT_BLUE_COLOR;

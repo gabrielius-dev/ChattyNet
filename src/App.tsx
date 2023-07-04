@@ -24,7 +24,6 @@ const Home = lazy(() => import("./components/Home/Home"));
 const Notifications = lazy(
   () => import("./components/Notifications/Notifications")
 );
-const Messages = lazy(() => import("./components/Messages/Messages"));
 const Bookmarks = lazy(() => import("./components/Bookmarks/Bookmarks"));
 const Profile = lazy(() => import("./components/Profile/Profile"));
 const LogInForm = lazy(() => import("./components/AuthForms/LogInForm"));
@@ -102,11 +101,7 @@ function App() {
         dispatch(showLoginReminder());
         setUserExists(false);
         const location = window.location.pathname;
-        if (
-          location === "/notifications" ||
-          location === "/bookmarks" ||
-          location === "/messages"
-        )
+        if (location === "/notifications" || location === "/bookmarks")
           navigate("/");
       }
     });
@@ -127,7 +122,6 @@ function App() {
           {isLoggedIn && (
             <>
               <Route path="/notifications" element={<Notifications />} />
-              <Route path="/messages" element={<Messages />} />
               <Route path="/bookmarks" element={<Bookmarks />} />
             </>
           )}
