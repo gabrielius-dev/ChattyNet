@@ -1,6 +1,6 @@
 import { Alert, Box, Snackbar } from "@mui/material";
 import Sidebar from "./components/Sidebar/Sidebar";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
 import useLocationListener from "./app/functions/historyListener";
 import { useEffect, useState, lazy, Suspense } from "react";
@@ -18,6 +18,7 @@ import RemainingSignUpSetup from "./components/AuthForms/RemainingSignUpSetup";
 import Followers from "./components/Profile/Followers";
 import Following from "./components/Profile/Following";
 import NotFound from "./components/NotFound";
+import PostPage from "./components/Home/PostPage";
 
 const Home = lazy(() => import("./components/Home/Home"));
 const Notifications = lazy(
@@ -50,7 +51,9 @@ function App() {
   const isAuthenticating = useAppSelector(
     (state) => state.user.isAuthenticating
   );
+  const isLoggedIn = useAppSelector((state) => state.user.isLoggedIn);
   const [userExists, setUserExists] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -98,11 +101,18 @@ function App() {
         dispatch(setUser({ isLoggedIn: false }));
         dispatch(showLoginReminder());
         setUserExists(false);
+        const location = window.location.pathname;
+        if (
+          location === "/notifications" ||
+          location === "/bookmarks" ||
+          location === "/messages"
+        )
+          navigate("/");
       }
     });
 
     return () => unsubscribe();
-  }, [dispatch, isSignUpSetupFinished, isAuthenticating]);
+  }, [dispatch, isSignUpSetupFinished, isAuthenticating, navigate]);
 
   useLocationListener();
 
@@ -114,15 +124,22 @@ function App() {
       <Suspense fallback={<CircularProgressComponent />}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/bookmarks" element={<Bookmarks />} />
+          {isLoggedIn && (
+            <>
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/bookmarks" element={<Bookmarks />} />
+            </>
+          )}
+
           <Route
             path="/:username"
             element={<Profile key={window.location.pathname} />}
           />
           <Route path="/:username/followers" element={<Followers />} />
           <Route path="/:username/following" element={<Following />} />
+          <Route path="/:username/posts/:postID" element={<PostPage />} />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
         {isLogInFormShowing && <LogInForm />}
